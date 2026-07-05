@@ -10,6 +10,7 @@
 // @grant        GM_getValue
 // @grant        GM_registerMenuCommand
 // @grant        GM_xmlhttpRequest
+// @grant        unsafeWindow
 // @connect      api.github.com
 // ==/UserScript==
 
@@ -134,27 +135,35 @@
     return /additional security check|hcaptcha|imperva|are you a robot|access denied|pardon our interruption/i.test(t);
   }
 
-  async function priceColes(id) {
-    // If we're standing on this product's page, read embedded data first
+  // Read the Next.js buildId over the network (page globals aren't reliably
+  // visible from the userscript sandbox). Cached per run.
+  let colesBuildId = null;
+  async function getColesBuildId() {
+    if (colesBuildId) return colesBuildId;
+    // try the page global first (works if the script has page access)
     try {
-      const p = window.__NEXT_DATA__ &&
-        window.__NEXT_DATA__.props &&
-        window.__NEXT_DATA__.props.pageProps &&
-        window.__NEXT_DATA__.props.pageProps.product;
-      const q = p && p.pricing;
-      if (q && q.now != null && String(p.id) === String(id)) {
-        return snap(q.now, q.was, q.specialType || q.promotionType);
+      const w = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
+      if (w.__NEXT_DATA__ && w.__NEXT_DATA__.buildId) {
+        colesBuildId = w.__NEXT_DATA__.buildId;
+        return colesBuildId;
       }
     } catch (e) { /* fall through */ }
-    const b = (window.__NEXT_DATA__ || {}).buildId;
-    if (!b) throw new Error('no buildId');
+    const html = await (await fetch('/', { headers: { accept: 'text/html' } })).text();
+    const m = html.match(/"buildId"\s*:\s*"([^"]+)"/);
+    if (!m) throw new Error('no buildId (challenge page?)');
+    colesBuildId = m[1];
+    return colesBuildId;
+  }
+
+  async function priceColes(id) {
+    const b = await getColesBuildId();
     const r = await fetch(`/_next/data/${b}/en/product/p-${id}.json?slug=p-${id}`, {
       headers: { accept: 'application/json' },
     });
     if (!r.ok) throw new Error('API HTTP ' + r.status);
     const j = await r.json();
     const q = ((j.pageProps || {}).product || {}).pricing;
-    if (!q || q.now == null) throw new Error('no price');
+    if (!q || q.now == null) throw new Error('no price in response');
     return snap(q.now, q.was, q.specialType || q.promotionType);
   }
 
@@ -227,7 +236,8 @@
           n++;
           await new Promise((r) => setTimeout(r, 500 + Math.random() * 500));
         } catch (e) {
-          fails.push(it.name);
+          fails.push(`${it.name}: ${e.message}`);
+          console.warn('[Price Tracker]', it.name, '→', e.message);
         }
       }
       if (n) {
@@ -235,7 +245,12 @@
         await writeFile('prices.json', prices.data, prices.sha, `Userscript prices (${store})`);
       }
       GM_setValue(key, Date.now());
-      toast(`${store}: pushed ${n}/${list.length}${fails.length ? ` · missed ${fails.length}` : ''} ✔`);
+      if (n) {
+        toast(`${store}: pushed ${n}/${list.length} ✔${fails.length ? ` · ${fails.length} missed` : ''}`);
+      } else {
+        // nothing captured — show the first reason so it's debuggable
+        toast(`${store}: 0/${list.length} — ${fails[0] || 'no items'}`);
+      }
     } catch (e) {
       toast('Error: ' + e.message);
     } finally {
