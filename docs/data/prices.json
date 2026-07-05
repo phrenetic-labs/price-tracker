@@ -1,10 +1,10 @@
 {
-  "lastRefresh": "2026-07-05T13:05:56.490Z",
+  "lastRefresh": "2026-07-05T13:11:52.661Z",
   "history": {
     "c1c7c796-467c-4e22-89c6-3f97d794fa6c": [
       {
         "date": "2026-07-05",
-        "store": "coles",
+        "store": "woolworths",
         "price": 4,
         "wasPrice": null,
         "onSpecial": false,
@@ -12,8 +12,18 @@
       },
       {
         "date": "2026-07-05",
-        "store": "woolworths",
+        "store": "coles",
         "price": 4,
+        "wasPrice": null,
+        "onSpecial": false,
+        "manual": false
+      }
+    ],
+    "65f6b78e-37da-4dd2-83cc-0b7fad2676b6": [
+      {
+        "date": "2026-07-05",
+        "store": "woolworths",
+        "price": 7.45,
         "wasPrice": null,
         "onSpecial": false,
         "manual": false
