@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1a1a2e">
+<title>Price Tracker</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #12121c; --card: #1c1c2b; --card2: #24243a; --text: #e8e8f0;
+    --muted: #9a9ab0; --accent: #4f8cff; --special: #ff4757; --good: #2ed573;
+    --coles: #e01a22; --woolworths: #178841; --border: #32324a;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); padding-bottom: 80px; }
+  header { position: sticky; top: 0; z-index: 10; background: var(--bg); border-bottom: 1px solid var(--border); padding: 14px 16px; display: flex; align-items: center; gap: 10px; }
+  header h1 { font-size: 1.1rem; flex: 1; }
+  .sub { font-size: .72rem; color: var(--muted); }
+  main { max-width: 760px; margin: 0 auto; padding: 12px 16px; }
+  .banner { border-radius: 10px; padding: 10px 14px; margin: 10px 0; font-size: .85rem; background: var(--card2); border: 1px solid var(--border); }
+  .banner.warn { border-color: #b8860b; }
+  button { font: inherit; border: none; border-radius: 8px; cursor: pointer; background: var(--accent); color: #fff; padding: 9px 14px; }
+  button.ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+  button.small { padding: 5px 10px; font-size: .78rem; }
+  button:disabled { opacity: .5; cursor: default; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; margin: 12px 0; }
+  .card.special { border-color: var(--special); box-shadow: 0 0 0 1px var(--special); }
+  .item-top { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .item-top h3 { font-size: 1rem; flex: 1; min-width: 140px; }
+  .badge { font-size: .68rem; font-weight: 700; padding: 3px 8px; border-radius: 999px; letter-spacing: .3px; }
+  .badge.special { background: var(--special); color: #fff; }
+  .badge.wait { background: #b8860b; color: #fff; }
+  .badge.buy { background: var(--good); color: #05230f; }
+  .prices { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+  .price-box { flex: 1; min-width: 150px; background: var(--card2); border-radius: 10px; padding: 9px 12px; border-left: 4px solid var(--border); }
+  .price-box.coles { border-left-color: var(--coles); }
+  .price-box.woolworths { border-left-color: var(--woolworths); }
+  .price-box .store { font-size: .68rem; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); }
+  .price-box .now { font-size: 1.25rem; font-weight: 700; }
+  .price-box .now.on-special { color: var(--special); }
+  .price-box .was { text-decoration: line-through; color: var(--muted); font-size: .8rem; margin-left: 6px; }
+  .price-box .meta { font-size: .7rem; color: var(--muted); margin-top: 2px; }
+  .upcoming { margin-top: 10px; font-size: .82rem; background: rgba(184,134,11,.12); border: 1px dashed #b8860b; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .verdict { margin-top: 10px; font-size: .85rem; }
+  .row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .chart-wrap { margin-top: 12px; display: none; }
+  .chart-wrap.open { display: block; }
+  .chart-box { position: relative; height: 220px; }
+  .stats { font-size: .72rem; color: var(--muted); margin-top: 6px; }
+  dialog { background: var(--card); color: var(--text); border: 1px solid var(--border); border-radius: 14px; padding: 18px; width: min(680px, 92vw); }
+  dialog::backdrop { background: rgba(0,0,0,.6); }
+  input, select { font: inherit; background: var(--card2); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 9px 12px; width: 100%; }
+  label { font-size: .78rem; color: var(--muted); display: block; margin: 10px 0 4px; }
+  .empty { text-align: center; color: var(--muted); padding: 48px 16px; }
+  .fab { position: fixed; right: 18px; bottom: 18px; width: 56px; height: 56px; border-radius: 50%; font-size: 1.6rem; box-shadow: 0 4px 16px rgba(0,0,0,.5); }
+  .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: 86px; background: var(--card2); border: 1px solid var(--border); padding: 10px 16px; border-radius: 10px; font-size: .82rem; display: none; max-width: 90vw; z-index: 20; }
+  .err { color: var(--special); font-size: .78rem; margin-top: 6px; white-space: pre-line; }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<header>
+  <h1>🛒 Price Tracker <span class="sub" id="lastRefresh"></span></h1>
+  <button class="ghost" id="bmBtn" title="Bookmarklet refresher">🔖</button>
+  <button class="ghost" id="cfgBtn" title="Settings">⚙️</button>
+  <button id="refreshBtn" title="Trigger the GitHub Actions scrape">Refresh</button>
+</header>
+
+<main>
+  <div class="banner warn" id="tokenBanner" style="display:none">
+    🔑 Read-only mode. Add a GitHub token in <b>⚙️ Settings</b> to add items, log specials and trigger refreshes.
+  </div>
+  <div class="banner" id="dayBanner"></div>
+  <div id="items"></div>
+  <div class="empty" id="empty" style="display:none">
+    No items yet. Tap <b>+</b> to add something you buy regularly.
+  </div>
+</main>
+
+<button class="fab" id="addBtn" title="Add item">+</button>
+<div class="toast" id="toast"></div>
+
+<!-- Settings dialog -->
+<dialog id="cfgDialog">
+  <h3>⚙️ Settings</h3>
+  <p class="sub" style="margin-top:6px">
+    The app reads and writes data files in your GitHub repo. Create a
+    <a href="https://github.com/settings/personal-access-tokens/new" target="_blank">fine-grained token</a>
+    scoped to <b>only this repo</b> with <b>Contents: read &amp; write</b> and
+    <b>Actions: read &amp; write</b> permissions.
+  </p>
+  <label>Repo owner (GitHub username)</label>
+  <input id="cfgOwner" placeholder="yourname">
+  <label>Repo name</label>
+  <input id="cfgRepo" placeholder="price-tracker">
+  <label>Fine-grained personal access token</label>
+  <input id="cfgToken" type="password" placeholder="github_pat_…">
+  <div class="row" style="justify-content:flex-end">
+    <button class="ghost" onclick="cfgDialog.close()">Cancel</button>
+    <button id="cfgSave">Save</button>
+  </div>
+</dialog>
+
+<!-- Add item dialog -->
+<dialog id="addDialog">
+  <h3>Add tracked item</h3>
+  <label>Item name</label>
+  <input id="addName" placeholder="e.g. Cadbury Dairy Milk 180g">
+  <label>Coles product URL or ID (optional)</label>
+  <input id="addColes" placeholder="https://www.coles.com.au/product/…  or  1234567">
+  <label>Woolworths product URL or ID (optional)</label>
+  <input id="addWow" placeholder="https://www.woolworths.com.au/shop/productdetails/…  or  123456">
+  <p class="sub" style="margin-top:8px">Find the product on each store's site (search there), then paste the page URL here. Prices arrive on the next refresh/bookmarklet run.</p>
+  <div class="err" id="addErr"></div>
+  <div class="row" style="justify-content:flex-end">
+    <button class="ghost" onclick="addDialog.close()">Cancel</button>
+    <button id="saveItemBtn">Add item</button>
+  </div>
+</dialog>
+
+<!-- Upcoming special dialog (Monday catalogue workflow) -->
+<dialog id="upcomingDialog">
+  <h3>Log upcoming special (from catalogue)</h3>
+  <p class="sub" id="upcomingItemName"></p>
+  <label>Store</label>
+  <select id="upStore"><option value="coles">Coles</option><option value="woolworths">Woolworths</option></select>
+  <label>Catalogue price ($)</label>
+  <input id="upPrice" type="number" step="0.01" min="0" inputmode="decimal">
+  <label>Note (optional)</label>
+  <input id="upNote" placeholder="e.g. ½ price, starts Wed">
+  <div class="row" style="justify-content:flex-end">
+    <button class="ghost" onclick="upcomingDialog.close()">Cancel</button>
+    <button id="upSave">Save</button>
+  </div>
+</dialog>
+
+<!-- Manual price dialog -->
+<dialog id="manualDialog">
+  <h3>Manual price entry</h3>
+  <p class="sub" id="manualItemName"></p>
+  <label>Store</label>
+  <select id="mStore"><option value="coles">Coles</option><option value="woolworths">Woolworths</option></select>
+  <label>Price today ($)</label>
+  <input id="mPrice" type="number" step="0.01" min="0" inputmode="decimal">
+  <label>Was price ($, optional)</label>
+  <input id="mWas" type="number" step="0.01" min="0" inputmode="decimal">
+  <label style="display:flex;align-items:center;gap:8px;margin-top:12px">
+    <input type="checkbox" id="mSpecial" style="width:auto"> On special
+  </label>
+  <div class="row" style="justify-content:flex-end">
+    <button class="ghost" onclick="manualDialog.close()">Cancel</button>
+    <button id="mSave">Save</button>
+  </div>
+</dialog>
+
+<!-- Bookmarklet dialog -->
+<dialog id="bmDialog">
+  <h3>🔖 Bookmarklet refresher</h3>
+  <p class="sub" style="margin-top:6px">
+    Runs <b>inside</b> the Coles/Woolworths page in your own browser — their bot
+    protection can't tell it apart from you browsing. Use it if the GitHub
+    Actions scrape gets blocked (most likely for Coles). It commits prices
+    straight to your repo. <b>Contains your token</b> — keep the bookmark private,
+    and re-copy it after changing settings.
+  </p>
+  <label>Bookmarklet code (bookmark URL)</label>
+  <input id="bmCode" readonly onclick="this.select()">
+  <div class="row">
+    <button class="small" id="bmCopy">Copy code</button>
+    <a id="bmLink" href="#" style="align-self:center;font-size:.82rem">or drag this link to your bookmarks bar</a>
+  </div>
+  <p class="sub" style="margin-top:12px">
+    <b>Set up (once):</b> Desktop — drag the link to the bookmarks bar.
+    Android Chrome — bookmark any page, then edit it: name it <i>Push prices</i>,
+    paste the code as the URL.<br><br>
+    <b>Use:</b> open <b>coles.com.au</b> or <b>woolworths.com.au</b>, tap the bookmark
+    (Android: tap the address bar, type <i>Push prices</i>, tap it).
+  </p>
+  <div class="row" style="justify-content:flex-end">
+    <button class="ghost" onclick="bmDialog.close()">Close</button>
+  </div>
+</dialog>
+
+<script>
+/* ------------------------------------------------------------ config */
+const $ = (id) => document.getElementById(id);
+const STORES = ['coles', 'woolworths'];
+const STORE_LABEL = { coles: 'Coles', woolworths: 'Woolworths' };
+const STORE_COLOR = { coles: '#e01a22', woolworths: '#2ed573' };
+const GH = 'https://api.github.com';
+
+function detectRepo() {
+  const m = location.hostname.match(/^([^.]+)\.github\.io$/);
+  const seg = location.pathname.split('/').filter(Boolean);
+  return m && seg.length ? { owner: m[1], repo: seg[0] } : { owner: '', repo: '' };
+}
+const detected = detectRepo();
+const CFG = {
+  owner: localStorage.getItem('pt_owner') || detected.owner,
+  repo: localStorage.getItem('pt_repo') || detected.repo,
+  token: localStorage.getItem('pt_token') || '',
+};
+
+/* ------------------------------------------------------------ state */
+let ITEMS = [];
+let PRICES = { lastRefresh: null, history: {} };
+const SHAS = {};
+const charts = {};
+
+/* ------------------------------------------------------ github layer */
+const b64e = (s) => btoa(unescape(encodeURIComponent(s)));
+const b64d = (s) => decodeURIComponent(escape(atob(s.replace(/\n/g, ''))));
+const ghHeaders = () => ({
+  Authorization: 'Bearer ' + CFG.token,
+  Accept: 'application/vnd.github+json',
+  'X-GitHub-Api-Version': '2022-11-28',
+});
+const canWrite = () => !!(CFG.token && CFG.owner && CFG.repo);
+
+async function ghRead(file) {
+  if (canWrite()) {
+    const r = await fetch(
+      `${GH}/repos/${CFG.owner}/${CFG.repo}/contents/docs/data/${file}?_=${Date.now()}`,
+      { headers: ghHeaders(), cache: 'no-store' }
+    );
+    if (r.ok) {
+      const j = await r.json();
+      SHAS[file] = j.sha;
+      return JSON.parse(b64d(j.content));
+    }
+    if (r.status !== 404) throw new Error(`GitHub read ${file}: HTTP ${r.status}`);
+  }
+  // fallback: same-origin Pages fetch (read-only; lags commits by ~1 min)
+  const r2 = await fetch(`data/${file}?_=${Date.now()}`, { cache: 'no-store' });
+  if (!r2.ok) throw new Error(`Could not load ${file}`);
+  return r2.json();
+}
+
+async function ghWrite(file, obj, message, retried = false) {
+  if (!canWrite()) throw new Error('Add your GitHub token in ⚙️ Settings first');
+  const body = {
+    message,
+    content: b64e(JSON.stringify(obj, null, 2) + '\n'),
+  };
+  if (SHAS[file]) body.sha = SHAS[file];
+  const r = await fetch(
+    `${GH}/repos/${CFG.owner}/${CFG.repo}/contents/docs/data/${file}`,
+    { method: 'PUT', headers: { ...ghHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
+  );
+  if ((r.status === 409 || r.status === 422) && !retried) {
+    await ghRead(file); // refresh sha
+    return ghWrite(file, obj, message, true);
+  }
+  if (!r.ok) throw new Error(`GitHub write ${file}: HTTP ${r.status}`);
+  const j = await r.json();
+  SHAS[file] = j.content.sha;
+}
+
+const saveItems = (msg) => ghWrite('items.json', ITEMS, msg || 'Update items');
+const savePrices = (msg) => ghWrite('prices.json', PRICES, msg || 'Update prices');
+
+/* ------------------------------------------------------------ helpers */
+const hist = (item) => (PRICES.history[item.id] || []);
+function latest(item, store) {
+  const rows = hist(item).filter((h) => h.store === store);
+  return rows.length ? rows[rows.length - 1] : null;
+}
+function cheapestEver(item, store) {
+  const rows = hist(item).filter((h) => h.store === store && h.price != null);
+  return rows.length ? Math.min(...rows.map((r) => r.price)) : null;
+}
+function bestCurrent(item) {
+  let best = null;
+  for (const s of STORES) {
+    const l = latest(item, s);
+    if (l && l.price != null && (!best || l.price < best.price)) best = { ...l, store: s };
+  }
+  return best;
+}
+function todayISO() {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Australia/Sydney' }).format(new Date());
+}
+function appendSnap(itemId, store, r, date) {
+  const rows = (PRICES.history[itemId] || []).filter((h) => !(h.date === date && h.store === store));
+  rows.push({ date, store, price: r.price, wasPrice: r.wasPrice ?? null, onSpecial: !!r.onSpecial, manual: !!r.manual });
+  rows.sort((a, b) => (a.date < b.date ? -1 : 1));
+  PRICES.history[itemId] = rows;
+}
+function money(v) { return v == null ? '—' : '$' + Number(v).toFixed(2); }
+function toast(msg) {
+  const t = $('toast'); t.textContent = msg; t.style.display = 'block';
+  clearTimeout(t._h); t._h = setTimeout(() => (t.style.display = 'none'), 5000);
+}
+function esc(s) { const d = document.createElement('div'); d.textContent = s ?? ''; return d.innerHTML; }
+
+function verdict(item) {
+  const best = bestCurrent(item);
+  const up = item.upcoming;
+  if (up && up.price != null && best && up.price < best.price) {
+    return { cls: 'wait', text: `⏳ Wait — ${money(up.price)} at ${STORE_LABEL[up.store]} from Wednesday (now ${money(best.price)})` };
+  }
+  if (up && up.price != null && best && up.price >= best.price) {
+    return { cls: 'buy', text: `✅ Buy now — current ${money(best.price)} beats the upcoming ${money(up.price)}` };
+  }
+  if (best && best.onSpecial) {
+    const cheap = cheapestEver(item, best.store);
+    const note = cheap != null && best.price <= cheap ? ' (equal-cheapest you’ve seen)' : '';
+    return { cls: 'buy', text: `✅ On special at ${STORE_LABEL[best.store]} — ${money(best.price)}${note}` };
+  }
+  return null;
+}
+
+/* ------------------------------------------------------------ render */
+function dayBanner() {
+  const day = new Date().toLocaleDateString('en-AU', { weekday: 'long', timeZone: 'Australia/Sydney' });
+  const msgs = {
+    Monday: '📖 New catalogues drop 5pm today — browse them and log any upcoming specials on your items (<a href="https://www.coles.com.au/catalogues" target="_blank">Coles</a> · <a href="https://www.woolworths.com.au/shop/catalogue" target="_blank">Woolworths</a>). Then compare: buy now, or wait for Wednesday?',
+    Tuesday: '⏰ Last day of the current specials — anything marked “buy now” ends tonight.',
+    Wednesday: '🆕 New specials are live — hit <b>Refresh</b> (or run the 🔖 bookmarklet) to pull them in.',
+  };
+  $('dayBanner').innerHTML = msgs[day] || `It's ${day} — specials run Wed–Tue. Refresh anytime to log prices.`;
+}
+
+function render() {
+  dayBanner();
+  $('tokenBanner').style.display = canWrite() ? 'none' : 'block';
+  $('lastRefresh').textContent = PRICES.lastRefresh
+    ? 'updated ' + new Date(PRICES.lastRefresh).toLocaleString('en-AU', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })
+    : '';
+  const wrap = $('items');
+  wrap.innerHTML = '';
+  $('empty').style.display = ITEMS.length ? 'none' : 'block';
+
+  for (const item of ITEMS) {
+    const v = verdict(item);
+    const anySpecial = STORES.some((s) => (latest(item, s) || {}).onSpecial);
+    const card = document.createElement('div');
+    card.className = 'card' + (anySpecial ? ' special' : '');
+
+    let priceBoxes = '';
+    for (const s of STORES) {
+      const link = (item.stores || {})[s];
+      if (!link || !link.productId) continue;
+      const l = latest(item, s);
+      const cheap = cheapestEver(item, s);
+      priceBoxes += `
+        <div class="price-box ${s}">
+          <div class="store">${STORE_LABEL[s]}${l && l.manual ? ' · manual' : ''}</div>
+          <div><span class="now ${l && l.onSpecial ? 'on-special' : ''}">${money(l && l.price)}</span>
+            ${l && l.wasPrice ? `<span class="was">${money(l.wasPrice)}</span>` : ''}
+            ${l && l.onSpecial ? '<span class="badge special">SPECIAL</span>' : ''}
+          </div>
+          <div class="meta">${l ? esc(l.date) : 'no data yet'}${cheap != null ? ` · cheapest ${money(cheap)}` : ''}
+            ${link.url ? ` · <a href="${esc(link.url)}" target="_blank">view</a>` : ''}</div>
+        </div>`;
+    }
+
+    card.innerHTML = `
+      <div class="item-top">
+        <h3>${esc(item.name)}</h3>
+        ${anySpecial ? '<span class="badge special">ON SPECIAL</span>' : ''}
+      </div>
+      <div class="prices">${priceBoxes || '<span class="sub">No store links — edit the item to add product URLs.</span>'}</div>
+      ${item.upcoming ? `<div class="upcoming">📖 Catalogue: ${money(item.upcoming.price)} at ${STORE_LABEL[item.upcoming.store]}${item.upcoming.note ? ' — ' + esc(item.upcoming.note) : ''}
+        <button class="small ghost" data-act="clearUp">clear</button></div>` : ''}
+      ${v ? `<div class="verdict"><span class="badge ${v.cls}">${v.cls === 'wait' ? 'WAIT' : 'BUY'}</span> ${v.text}</div>` : ''}
+      <div class="row">
+        <button class="small ghost" data-act="chart">📈 History</button>
+        <button class="small ghost" data-act="upcoming">📖 Log upcoming</button>
+        <button class="small ghost" data-act="manual">✏️ Manual price</button>
+        <button class="small ghost" data-act="delete" style="margin-left:auto">🗑</button>
+      </div>
+      <div class="chart-wrap" id="chart-${item.id}"><div class="chart-box"><canvas></canvas></div>
+        <div class="stats"></div></div>`;
+
+    card.querySelectorAll('[data-act]').forEach((btn) =>
+      btn.addEventListener('click', () => onAction(btn.dataset.act, item))
+    );
+    wrap.appendChild(card);
+  }
+}
+
+/* ------------------------------------------------------------ charts */
+function toggleChart(item) {
+  const wrap = $('chart-' + item.id);
+  wrap.classList.toggle('open');
+  if (!wrap.classList.contains('open')) return;
+  if (charts[item.id]) charts[item.id].destroy();
+
+  const rows = hist(item);
+  const dates = [...new Set(rows.map((h) => h.date))].sort();
+  const datasets = STORES.filter((s) => (item.stores || {})[s] && (item.stores || {})[s].productId).map((s) => {
+    const byDate = Object.fromEntries(rows.filter((h) => h.store === s).map((h) => [h.date, h]));
+    return {
+      label: STORE_LABEL[s],
+      data: dates.map((d) => (byDate[d] ? byDate[d].price : null)),
+      borderColor: STORE_COLOR[s],
+      backgroundColor: STORE_COLOR[s],
+      spanGaps: true,
+      tension: 0.15,
+      pointRadius: dates.map((d) => (byDate[d] && byDate[d].onSpecial ? 6 : 3)),
+      pointStyle: dates.map((d) => (byDate[d] && byDate[d].onSpecial ? 'rectRot' : 'circle')),
+    };
+  });
+
+  charts[item.id] = new Chart(wrap.querySelector('canvas'), {
+    type: 'line',
+    data: { labels: dates, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: {
+        y: { ticks: { callback: (v) => '$' + v, color: '#9a9ab0' }, grid: { color: '#32324a' } },
+        x: { ticks: { color: '#9a9ab0' }, grid: { color: '#32324a' } },
+      },
+      plugins: {
+        legend: { labels: { color: '#e8e8f0' } },
+        tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${money(c.parsed.y)}` } },
+      },
+    },
+  });
+  wrap.querySelector('.stats').textContent = '◆ larger diamond points = on special that day';
+}
+
+/* ------------------------------------------------------------ actions */
+let dialogItem = null;
+
+function onAction(act, item) {
+  dialogItem = item;
+  if (act === 'chart') toggleChart(item);
+  if (act === 'delete' && confirm(`Stop tracking “${item.name}”?`)) {
+    ITEMS = ITEMS.filter((i) => i.id !== item.id);
+    delete PRICES.history[item.id];
+    Promise.all([saveItems(`Remove ${item.name}`), savePrices(`Remove ${item.name} history`)])
+      .then(render)
+      .catch((e) => toast(e.message));
+  }
+  if (act === 'upcoming') {
+    $('upcomingItemName').textContent = item.name;
+    $('upPrice').value = item.upcoming ? item.upcoming.price : '';
+    $('upNote').value = item.upcoming ? item.upcoming.note || '' : '';
+    if (item.upcoming) $('upStore').value = item.upcoming.store;
+    upcomingDialog.showModal();
+  }
+  if (act === 'clearUp') {
+    item.upcoming = null;
+    saveItems(`Clear upcoming for ${item.name}`).then(render).catch((e) => toast(e.message));
+  }
+  if (act === 'manual') {
+    $('manualItemName').textContent = item.name;
+    $('mPrice').value = ''; $('mWas').value = ''; $('mSpecial').checked = false;
+    manualDialog.showModal();
+  }
+}
+
+$('upSave').onclick = () => {
+  const price = parseFloat($('upPrice').value);
+  if (isNaN(price)) return;
+  dialogItem.upcoming = { store: $('upStore').value, price, note: $('upNote').value.trim() };
+  upcomingDialog.close();
+  saveItems(`Log upcoming special for ${dialogItem.name}`).then(render).catch((e) => toast(e.message));
+};
+
+$('mSave').onclick = () => {
+  const price = parseFloat($('mPrice').value);
+  if (isNaN(price)) return;
+  const was = parseFloat($('mWas').value);
+  appendSnap(dialogItem.id, $('mStore').value, {
+    price, wasPrice: isNaN(was) ? null : was, onSpecial: $('mSpecial').checked, manual: true,
+  }, todayISO());
+  manualDialog.close();
+  savePrices(`Manual price for ${dialogItem.name}`).then(render).catch((e) => toast(e.message));
+};
+
+/* ------------------------------------------------------------ refresh */
+async function defaultBranch() {
+  const r = await fetch(`${GH}/repos/${CFG.owner}/${CFG.repo}`, { headers: ghHeaders() });
+  if (!r.ok) throw new Error('Could not read repo info');
+  return (await r.json()).default_branch;
+}
+
+$('refreshBtn').onclick = async () => {
+  if (!canWrite()) { cfgDialog.showModal(); return; }
+  const btn = $('refreshBtn');
+  btn.disabled = true; btn.textContent = 'Scraping…';
+  try {
+    const ref = await defaultBranch();
+    const r = await fetch(
+      `${GH}/repos/${CFG.owner}/${CFG.repo}/actions/workflows/scrape.yml/dispatches`,
+      { method: 'POST', headers: { ...ghHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ ref }) }
+    );
+    if (r.status !== 204) throw new Error(`Workflow dispatch failed: HTTP ${r.status}`);
+    toast('Scrape started on GitHub Actions — prices usually land in 2–3 min. Watching…');
+    const before = PRICES.lastRefresh;
+    for (let i = 0; i < 15; i++) {
+      await new Promise((s) => setTimeout(s, 20000));
+      try {
+        const p = await ghRead('prices.json');
+        if (p.lastRefresh !== before) {
+          PRICES = p;
+          render();
+          toast('Prices updated ✔ (check items — Coles may still need the 🔖 bookmarklet)');
+          break;
+        }
+      } catch { /* keep polling */ }
+    }
+  } catch (e) { toast(e.message); }
+  btn.disabled = false; btn.textContent = 'Refresh';
+};
+
+/* ------------------------------------------------------------ settings */
+$('cfgBtn').onclick = () => {
+  $('cfgOwner').value = CFG.owner; $('cfgRepo').value = CFG.repo; $('cfgToken').value = CFG.token;
+  cfgDialog.showModal();
+};
+$('cfgSave').onclick = () => {
+  CFG.owner = $('cfgOwner').value.trim(); CFG.repo = $('cfgRepo').value.trim(); CFG.token = $('cfgToken').value.trim();
+  localStorage.setItem('pt_owner', CFG.owner);
+  localStorage.setItem('pt_repo', CFG.repo);
+  localStorage.setItem('pt_token', CFG.token);
+  cfgDialog.close();
+  init();
+};
+
+/* ------------------------------------------------------------ add item */
+function parseProduct(store, input) {
+  input = input.trim();
+  if (!input) return null;
+  if (/^\d+$/.test(input)) {
+    const url = store === 'coles'
+      ? `https://www.coles.com.au/product/p-${input}`
+      : `https://www.woolworths.com.au/shop/productdetails/${input}`;
+    return { productId: input, url };
+  }
+  const m = store === 'coles'
+    ? input.match(/\/product\/[^/?#]*?-(\d+)(?:[/?#]|$)/) || input.match(/(\d{6,})/)
+    : input.match(/productdetails\/(\d+)/) || input.match(/(\d{5,})/);
+  if (!m) return undefined; // unparseable
+  return { productId: m[1], url: input.startsWith('http') ? input : null };
+}
+
+$('addBtn').onclick = () => {
+  if (!canWrite()) { cfgDialog.showModal(); return; }
+  $('addName').value = ''; $('addColes').value = ''; $('addWow').value = ''; $('addErr').textContent = '';
+  addDialog.showModal();
+};
+
+$('saveItemBtn').onclick = async () => {
+  const name = $('addName').value.trim();
+  if (!name) { $('addErr').textContent = 'Name is required.'; return; }
+  const stores = {};
+  const coles = parseProduct('coles', $('addColes').value);
+  const wow = parseProduct('woolworths', $('addWow').value);
+  if (coles === undefined || wow === undefined) {
+    $('addErr').textContent = 'Could not find a product ID in that URL — paste the full product page URL.';
+    return;
+  }
+  if (coles) stores.coles = coles;
+  if (wow) stores.woolworths = wow;
+  ITEMS.push({ id: crypto.randomUUID(), name, stores, upcoming: null });
+  addDialog.close();
+  try {
+    await saveItems(`Track ${name}`);
+    render();
+    toast('Added ✔ — prices arrive on the next refresh or bookmarklet run');
+  } catch (e) { toast(e.message); }
+};
+
+/* ------------------------------------------------------------ bookmarklet */
+function bmSource() {
+  const O = CFG.owner, R = CFG.repo, T = CFG.token;
+  return "(async()=>{const O=" + JSON.stringify(O) + ",R=" + JSON.stringify(R) + ",T=" + JSON.stringify(T) + ";" +
+    "const A='https://api.github.com/repos/'+O+'/'+R+'/contents/docs/data/';" +
+    "const HD={Authorization:'Bearer '+T,Accept:'application/vnd.github+json'};" +
+    "const e64=s=>btoa(unescape(encodeURIComponent(s)));const d64=s=>decodeURIComponent(escape(atob(s.replace(/\\n/g,''))));" +
+    "const h=location.hostname;const store=h.includes('coles')?'coles':h.includes('woolworths')?'woolworths':null;" +
+    "if(!store){alert('Open coles.com.au or woolworths.com.au first, then tap the bookmark.');return;}" +
+    "const rd=async f=>{const r=await fetch(A+f+'?_='+Date.now(),{headers:HD,cache:'no-store'});if(!r.ok)throw new Error(f+' HTTP '+r.status);const j=await r.json();return{data:JSON.parse(d64(j.content)),sha:j.sha};};" +
+    "let items,pr;try{items=(await rd('items.json')).data;pr=await rd('prices.json');}catch(e){alert('Could not reach GitHub: '+e.message);return;}" +
+    "const list=items.filter(i=>i.stores&&i.stores[store]&&i.stores[store].productId);" +
+    "const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Australia/Sydney'}).format(new Date());let n=0;" +
+    "for(const it of list){const id=it.stores[store].productId;try{let snap=null;" +
+    "if(store==='woolworths'){const p=await(await fetch('/apis/ui/product/detail/'+id+'?isMobile=false')).json();const q=p.Product||p;" +
+    "if(q&&q.Price!=null)snap={price:q.Price,wasPrice:q.WasPrice>q.Price?q.WasPrice:null,onSpecial:!!q.IsOnSpecial};}" +
+    "else{const b=(window.__NEXT_DATA__||{}).buildId;" +
+    "const j=await(await fetch('/_next/data/'+b+'/en/product/p-'+id+'.json?slug=p-'+id)).json();" +
+    "const q=((j.pageProps||{}).product||{}).pricing;" +
+    "if(q&&q.now!=null)snap={price:q.now,wasPrice:q.was>q.now?q.was:null,onSpecial:!!(q.was>q.now||q.specialType||q.promotionType)};}" +
+    "if(snap){const rows=(pr.data.history[it.id]||[]).filter(x=>!(x.date===today&&x.store===store));" +
+    "rows.push({date:today,store:store,price:snap.price,wasPrice:snap.wasPrice,onSpecial:snap.onSpecial,manual:false});" +
+    "rows.sort((a,b)=>a.date<b.date?-1:1);pr.data.history[it.id]=rows;n++;}" +
+    "}catch(e){}}" +
+    "pr.data.lastRefresh=new Date().toISOString();" +
+    "const w=await fetch(A+'prices.json',{method:'PUT',headers:Object.assign({'Content-Type':'application/json'},HD)," +
+    "body:JSON.stringify({message:'Bookmarklet prices ('+store+')',content:e64(JSON.stringify(pr.data,null,2)+'\\n'),sha:pr.sha})});" +
+    "alert(w.ok?('Pushed '+n+'/'+list.length+' '+store+' prices to the tracker'):('GitHub commit failed: HTTP '+w.status));})();";
+}
+
+$('bmBtn').onclick = () => {
+  if (!canWrite()) { cfgDialog.showModal(); return; }
+  const url = 'javascript:' + encodeURIComponent(bmSource());
+  $('bmCode').value = url;
+  $('bmLink').href = url;
+  bmDialog.showModal();
+};
+$('bmCopy').onclick = async () => {
+  await navigator.clipboard.writeText($('bmCode').value);
+  toast('Bookmarklet copied ✔');
+};
+
+/* ------------------------------------------------------------ init */
+async function init() {
+  try {
+    [ITEMS, PRICES] = await Promise.all([ghRead('items.json'), ghRead('prices.json')]);
+    PRICES.history = PRICES.history || {};
+  } catch (e) {
+    ITEMS = ITEMS || [];
+    toast('Load failed: ' + e.message);
+  }
+  render();
+}
+init();
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>
