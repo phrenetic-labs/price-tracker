@@ -23,7 +23,18 @@ scraper/scrape.js      ← Playwright scraper, run by Actions
 - **Reading:** the app reads `items.json`/`prices.json` via the GitHub API (instant). Without a token it falls back to reading them from Pages (read-only, ~1 min behind commits).
 - **Writing:** adding items, logging catalogue specials, and manual prices are commits made by the app via the GitHub API — your shopping list has version history for free.
 - **Scraping:** the workflow runs headless Chromium via Playwright, loads each store's site so the bot-protection JS executes, then fetches your products' prices *from inside the page* (same-origin) and commits `prices.json`. Runs Monday ~5pm and Wednesday ~8am AEST, plus whenever you hit **Refresh** in the app (`workflow_dispatch`).
-- **Bot-blocking reality:** Actions runners are datacenter IPs. Woolworths will probably work; Coles (Akamai) may block even Playwright. When that happens: open coles.com.au on your phone, tap the 🔖 bookmarklet — it fetches prices from inside the real page in your real browser (indistinguishable from you) and commits them via the GitHub API. Manual entry (✏️) is the always-works fallback.
+- **Bot-blocking reality:** Actions runners are datacenter IPs. Woolworths works from CI; **Coles is behind Imperva + hCaptcha and blocks the runner** (it serves an "I am human" page instead of data). No amount of server-side stealth clears that — it's an IP-reputation + CAPTCHA wall, deliberately. The clean fix is to read Coles prices in *your own browser*, where you genuinely are a human on a residential connection: the userscript (below) or the 🔖 bookmarklet. Manual entry (✏️) is the always-works fallback.
+
+## Userscript (hands-off capture in your own browser)
+
+The userscript reads prices while you browse the stores normally — same session, your device, your IP — and commits them to the repo. This is the recommended path for Coles.
+
+1. Install [Tampermonkey](https://www.tampermonkey.net/) (Chrome/Edge/Safari desktop; on Android use **Firefox** + Tampermonkey).
+2. Open `userscript/price-tracker.user.js` from this repo (or the raw GitHub URL) — Tampermonkey offers to install it.
+3. Click the Tampermonkey icon → **⚙️ Configure Price Tracker** → enter your GitHub owner, repo, and a fine-grained token with **Contents: read & write**.
+4. Just visit coles.com.au / woolworths.com.au as normal. A few seconds after a page loads (and isn't a security-check page), it captures your tracked items' prices and pushes them. It self-throttles to once per store per 3 hours; **🔄 Capture prices now** in the menu forces a run.
+
+No bot evasion is involved: the script only runs in a real page you loaded yourself. If Coles ever shows *you* the "I am human" check, tick it like any shopper, then let the script run.
 
 ## Weekly routine
 
