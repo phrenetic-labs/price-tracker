@@ -135,36 +135,49 @@
     return /additional security check|hcaptcha|imperva|are you a robot|access denied|pardon our interruption/i.test(t);
   }
 
-  // Read the Next.js buildId over the network (page globals aren't reliably
-  // visible from the userscript sandbox). Cached per run.
-  let colesBuildId = null;
-  async function getColesBuildId() {
-    if (colesBuildId) return colesBuildId;
-    // try the page global first (works if the script has page access)
-    try {
-      const w = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
-      if (w.__NEXT_DATA__ && w.__NEXT_DATA__.buildId) {
-        colesBuildId = w.__NEXT_DATA__.buildId;
-        return colesBuildId;
+  // Recursively find the product node that carries a usable price.
+  function findColesPricing(obj, depth) {
+    if (!obj || typeof obj !== 'object' || depth > 6) return null;
+    const p = obj.pricing || obj.price;
+    if (p && typeof p === 'object') {
+      const now = p.now ?? p.value ?? p.current ?? (typeof p === 'number' ? p : null);
+      if (now != null && !isNaN(Number(now))) {
+        const was = p.was ?? p.wasPrice ?? null;
+        return { now: Number(now), was: was != null ? Number(was) : null,
+                 promo: p.specialType || p.promotionType || p.onPromotion };
       }
-    } catch (e) { /* fall through */ }
-    const html = await (await fetch('/', { headers: { accept: 'text/html' } })).text();
-    const m = html.match(/"buildId"\s*:\s*"([^"]+)"/);
-    if (!m) throw new Error('no buildId (challenge page?)');
-    colesBuildId = m[1];
-    return colesBuildId;
+    }
+    for (const k of Object.keys(obj)) {
+      const hit = findColesPricing(obj[k], depth + 1);
+      if (hit) return hit;
+    }
+    return null;
   }
 
   async function priceColes(id) {
-    const b = await getColesBuildId();
-    const r = await fetch(`/_next/data/${b}/en/product/p-${id}.json?slug=p-${id}`, {
-      headers: { accept: 'application/json' },
-    });
-    if (!r.ok) throw new Error('API HTTP ' + r.status);
-    const j = await r.json();
-    const q = ((j.pageProps || {}).product || {}).pricing;
-    if (!q || q.now == null) throw new Error('no price in response');
-    return snap(q.now, q.was, q.specialType || q.promotionType);
+    // Fetch the real product page HTML (same as a browser navigation) and
+    // read the embedded __NEXT_DATA__ JSON — includes the rendered price.
+    const r = await fetch(`/product/p-${id}`, { headers: { accept: 'text/html' } });
+    if (!r.ok) throw new Error('page HTTP ' + r.status);
+    const html = await r.text();
+    if (/additional security check|hcaptcha|imperva/i.test(html)) {
+      throw new Error('security-check page — solve the “I am human” box, then retry');
+    }
+    const m = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/);
+    if (!m) throw new Error('no __NEXT_DATA__ in page');
+    let data;
+    try {
+      data = JSON.parse(m[1]);
+    } catch (e) {
+      throw new Error('could not parse page data');
+    }
+    const product = data.props && data.props.pageProps && data.props.pageProps.product;
+    const hit = findColesPricing(product || data.props, 0);
+    if (!hit) {
+      const keys = product && product.pricing ? Object.keys(product.pricing).join(',') : 'none';
+      throw new Error('no price (pricing keys: ' + keys + ')');
+    }
+    return snap(hit.now, hit.was, hit.promo);
   }
 
   async function priceWoolworths(id) {
