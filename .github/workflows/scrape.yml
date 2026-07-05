@@ -27,7 +27,7 @@ jobs:
 
       - name: Install Playwright + real Chrome
         run: |
-          npm install playwright
+          npm install --no-save playwright
           npx playwright install --with-deps chromium
           npx playwright install chrome || echo "Chrome install failed — will fall back to Chromium"
 
@@ -52,6 +52,6 @@ jobs:
             echo "No price changes to commit."
           else
             git commit -m "Prices $(TZ=Australia/Sydney date +'%Y-%m-%d %H:%M AEST')"
-            git pull --rebase origin ${GITHUB_REF_NAME}
+            git pull --rebase --autostash origin ${GITHUB_REF_NAME}
             git push
           fi
