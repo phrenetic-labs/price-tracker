@@ -25,13 +25,14 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install Playwright
+      - name: Install Playwright + real Chrome
         run: |
           npm install playwright
           npx playwright install --with-deps chromium
+          npx playwright install chrome || echo "Chrome install failed — will fall back to Chromium"
 
-      - name: Scrape prices
-        run: node scraper/scrape.js
+      - name: Scrape prices (headful under xvfb)
+        run: xvfb-run --auto-servernum node scraper/scrape.js
 
       - name: Commit prices.json
         run: |
