@@ -172,7 +172,7 @@ async function newStealthContext(browser) {
 async function looksBlocked(page) {
   return page.evaluate(() => {
     const t = (document.title || '') + ' ' + document.body.innerText.slice(0, 400);
-    return /access denied|pardon our interruption|are you a robot|request unsuccessful|incapsula|reference #/i.test(t);
+    return /access denied|pardon our interruption|are you a robot|request unsuccessful|incapsula|imperva|hcaptcha|additional security check|reference #/i.test(t);
   }).catch(() => false);
 }
 
