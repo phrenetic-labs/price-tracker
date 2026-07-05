@@ -34,6 +34,15 @@ jobs:
       - name: Scrape prices (headful under xvfb)
         run: xvfb-run --auto-servernum node scraper/scrape.js
 
+      - name: Upload failure screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: failure-screenshots
+          path: debug/
+          if-no-files-found: ignore
+          retention-days: 7
+
       - name: Commit prices.json
         run: |
           git config user.name "price-bot"

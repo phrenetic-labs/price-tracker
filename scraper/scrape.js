@@ -20,6 +20,21 @@ const path = require('path');
 const ROOT = path.join(__dirname, '..');
 const ITEMS_FILE = path.join(ROOT, 'docs', 'data', 'items.json');
 const PRICES_FILE = path.join(ROOT, 'docs', 'data', 'prices.json');
+const DEBUG_DIR = path.join(ROOT, 'debug'); // uploaded as a workflow artifact on failure
+
+/** Save a screenshot + page HTML when something fails, for post-mortem. */
+async function snapFail(page, store, label) {
+  try {
+    fs.mkdirSync(DEBUG_DIR, { recursive: true });
+    const slug = `${store}-${label}`.replace(/[^a-z0-9]+/gi, '-').toLowerCase().slice(0, 80);
+    await page.screenshot({ path: path.join(DEBUG_DIR, `${slug}.png`), fullPage: false });
+    const html = await page.content();
+    fs.writeFileSync(path.join(DEBUG_DIR, `${slug}.html`), html);
+    console.log(`  📸 saved debug/${slug}.png (+.html)`);
+  } catch (e) {
+    console.log(`  (screenshot failed: ${e.message.split('\n')[0]})`);
+  }
+}
 
 const HOME = {
   coles: 'https://www.coles.com.au/',
@@ -170,6 +185,7 @@ async function scrapeStore(browser, store, entries, prices, date, errors) {
     await page.goto(HOME[store], { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForTimeout(8000);
     if (await looksBlocked(page)) {
+      await snapFail(page, store, 'homepage-challenge');
       throw new Error('bot challenge on homepage — runner IP is blocked');
     }
 
@@ -187,6 +203,7 @@ async function scrapeStore(browser, store, entries, prices, date, errors) {
       } catch (e) {
         errors.push(`${name} @ ${store}: ${e.message.split('\n')[0]}`);
         console.log(`  ✘ ${name}: ${e.message.split('\n')[0]}`);
+        await snapFail(page, store, name);
       }
       await page.waitForTimeout(1500); // be polite
     }
