@@ -13,5 +13,20 @@
       }
     },
     "upcoming": null
+  },
+  {
+    "id": "65f6b78e-37da-4dd2-83cc-0b7fad2676b6",
+    "name": "Balsamic Vinegar",
+    "stores": {
+      "coles": {
+        "productId": "4618107",
+        "url": "https://www.coles.com.au/product/mazzetti-aged-balsamic-vinegar-gold-label-4-seal-250ml-4618107"
+      },
+      "woolworths": {
+        "productId": "224075",
+        "url": "https://www.woolworths.com.au/shop/productdetails/224075/mazzetti-vinegar-balsamic-gold-label-4-seal"
+      }
+    },
+    "upcoming": null
   }
 ]
