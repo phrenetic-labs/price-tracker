@@ -99,5 +99,16 @@
       }
     },
     "upcoming": null
+  },
+  {
+    "id": "fa2ddfd1-9dde-4175-993f-78aef8024a28",
+    "name": "Dove Clinical",
+    "stores": {
+      "woolworths": {
+        "productId": "328741",
+        "url": "https://www.woolworths.com.au/shop/productdetails/328741/dove-women-clinical-96hr-deodorant-stick-fresh"
+      }
+    },
+    "upcoming": null
   }
 ]
