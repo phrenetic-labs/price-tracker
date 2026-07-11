@@ -226,5 +226,20 @@
       }
     },
     "upcoming": null
+  },
+  {
+    "id": "8fadc588-92c1-43ab-b85c-9215e91f8dc8",
+    "name": "Pappadums",
+    "stores": {
+      "coles": {
+        "productId": "9725308",
+        "url": "https://www.coles.com.au/product/patak's-plain-mini-pappadums-75g-9725308"
+      },
+      "woolworths": {
+        "productId": "210164",
+        "url": "https://www.woolworths.com.au/shop/productdetails/210164/patak-s-ready-to-eat-pappadums-mini-plain-original"
+      }
+    },
+    "upcoming": null
   }
 ]
