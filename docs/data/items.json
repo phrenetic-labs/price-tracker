@@ -58,5 +58,20 @@
       }
     },
     "upcoming": null
+  },
+  {
+    "id": "b20cc77a-a8f8-4b49-9e71-e663dab0a431",
+    "name": "Ayam Coconut Milk",
+    "stores": {
+      "coles": {
+        "productId": "6165003",
+        "url": "https://www.coles.com.au/product/ayam-100-percent-natural-coconut-milk-270ml-6165003"
+      },
+      "woolworths": {
+        "productId": "57198",
+        "url": "https://www.woolworths.com.au/shop/productdetails/57198/ayam-100-natural-coconut-milk"
+      }
+    },
+    "upcoming": null
   }
 ]
