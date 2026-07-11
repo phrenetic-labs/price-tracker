@@ -125,5 +125,20 @@
       }
     },
     "upcoming": null
+  },
+  {
+    "id": "a291449b-00fa-4115-bb58-bab083b1d63a",
+    "name": "Bosistos Hand Wash",
+    "stores": {
+      "coles": {
+        "productId": "3519471",
+        "url": "https://www.coles.com.au/product/bosisto's-banksia-flower-and-lavender-hand-wash-refill-1l-3519471"
+      },
+      "woolworths": {
+        "productId": "909458",
+        "url": "https://www.woolworths.com.au/shop/productdetails/909458/bosisto-s-hand-wash-refill-banksia-flower-lavender"
+      }
+    },
+    "upcoming": null
   }
 ]
