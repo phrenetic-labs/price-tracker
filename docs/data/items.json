@@ -155,5 +155,20 @@
       }
     },
     "upcoming": null
+  },
+  {
+    "id": "853cba6f-3795-497b-b7b8-2ac56c056499",
+    "name": "Corn Thins",
+    "stores": {
+      "coles": {
+        "productId": "8000070",
+        "url": "https://www.coles.com.au/product/real-foods-multigrain-corn-thins-150g-8000070"
+      },
+      "woolworths": {
+        "productId": "4021",
+        "url": "https://www.woolworths.com.au/shop/productdetails/4021/real-foods-corn-thins-multigrain"
+      }
+    },
+    "upcoming": null
   }
 ]
