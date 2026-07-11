@@ -1,5 +1,5 @@
 {
-  "lastRefresh": "2026-07-11T06:10:11.981Z",
+  "lastRefresh": "2026-07-11T06:16:27.314Z",
   "history": {
     "c1c7c796-467c-4e22-89c6-3f97d794fa6c": [
       {
@@ -37,6 +37,14 @@
       {
         "date": "2026-07-11",
         "store": "coles",
+        "price": 4,
+        "wasPrice": null,
+        "onSpecial": false,
+        "manual": false
+      },
+      {
+        "date": "2026-07-11",
+        "store": "woolworths",
         "price": 4,
         "wasPrice": null,
         "onSpecial": false,
@@ -83,12 +91,28 @@
         "wasPrice": null,
         "onSpecial": false,
         "manual": false
+      },
+      {
+        "date": "2026-07-11",
+        "store": "woolworths",
+        "price": 6,
+        "wasPrice": 7.45,
+        "onSpecial": true,
+        "manual": false
       }
     ],
     "510adcd6-cd45-476a-9e51-8b5cf3055415": [
       {
         "date": "2026-07-11",
         "store": "coles",
+        "price": 5.8,
+        "wasPrice": null,
+        "onSpecial": false,
+        "manual": false
+      },
+      {
+        "date": "2026-07-11",
+        "store": "woolworths",
         "price": 5.8,
         "wasPrice": null,
         "onSpecial": false,
@@ -103,12 +127,28 @@
         "wasPrice": null,
         "onSpecial": false,
         "manual": false
+      },
+      {
+        "date": "2026-07-11",
+        "store": "woolworths",
+        "price": 5.7,
+        "wasPrice": null,
+        "onSpecial": false,
+        "manual": false
       }
     ],
     "b20cc77a-a8f8-4b49-9e71-e663dab0a431": [
       {
         "date": "2026-07-11",
         "store": "coles",
+        "price": 4,
+        "wasPrice": null,
+        "onSpecial": false,
+        "manual": false
+      },
+      {
+        "date": "2026-07-11",
+        "store": "woolworths",
         "price": 4,
         "wasPrice": null,
         "onSpecial": false,
@@ -123,12 +163,28 @@
         "wasPrice": null,
         "onSpecial": false,
         "manual": false
+      },
+      {
+        "date": "2026-07-11",
+        "store": "woolworths",
+        "price": 2.45,
+        "wasPrice": null,
+        "onSpecial": false,
+        "manual": false
       }
     ],
     "227970a4-95c6-4238-8889-7f6befef8f41": [
       {
         "date": "2026-07-11",
         "store": "coles",
+        "price": 23,
+        "wasPrice": null,
+        "onSpecial": false,
+        "manual": false
+      },
+      {
+        "date": "2026-07-11",
+        "store": "woolworths",
         "price": 23,
         "wasPrice": null,
         "onSpecial": false,
@@ -143,6 +199,14 @@
         "wasPrice": 17,
         "onSpecial": true,
         "manual": false
+      },
+      {
+        "date": "2026-07-11",
+        "store": "woolworths",
+        "price": 10.2,
+        "wasPrice": 17,
+        "onSpecial": true,
+        "manual": false
       }
     ],
     "08ec3b44-57dc-4d3e-b221-0e426117536b": [
@@ -153,6 +217,14 @@
         "wasPrice": 6,
         "onSpecial": true,
         "manual": false
+      },
+      {
+        "date": "2026-07-11",
+        "store": "woolworths",
+        "price": 6,
+        "wasPrice": null,
+        "onSpecial": false,
+        "manual": false
       }
     ],
     "853cba6f-3795-497b-b7b8-2ac56c056499": [
@@ -162,6 +234,124 @@
         "price": 2.1,
         "wasPrice": null,
         "onSpecial": false,
+        "manual": false
+      },
+      {
+        "date": "2026-07-11",
+        "store": "woolworths",
+        "price": 1.05,
+        "wasPrice": 2.1,
+        "onSpecial": true,
+        "manual": false
+      }
+    ],
+    "440e8ba7-5353-4d7f-b0aa-8c1af89ad09f": [
+      {
+        "date": "2026-07-11",
+        "store": "woolworths",
+        "price": 6.95,
+        "wasPrice": null,
+        "onSpecial": false,
+        "manual": false
+      }
+    ],
+    "fa2ddfd1-9dde-4175-993f-78aef8024a28": [
+      {
+        "date": "2026-07-11",
+        "store": "woolworths",
+        "price": 13,
+        "wasPrice": null,
+        "onSpecial": false,
+        "manual": false
+      }
+    ],
+    "3b2d7b24-f48d-4561-8b5a-5a3fea978bdf": [
+      {
+        "date": "2026-07-11",
+        "store": "woolworths",
+        "price": 3,
+        "wasPrice": 4,
+        "onSpecial": true,
+        "manual": false
+      }
+    ],
+    "43b8e379-5a3e-443d-a7cd-d24cda7c9432": [
+      {
+        "date": "2026-07-11",
+        "store": "woolworths",
+        "price": 11,
+        "wasPrice": null,
+        "onSpecial": false,
+        "manual": false
+      }
+    ],
+    "5ff32d39-0d3a-450d-b638-00873a1d7e21": [
+      {
+        "date": "2026-07-11",
+        "store": "woolworths",
+        "price": 13,
+        "wasPrice": null,
+        "onSpecial": false,
+        "manual": false
+      }
+    ],
+    "8fadc588-92c1-43ab-b85c-9215e91f8dc8": [
+      {
+        "date": "2026-07-11",
+        "store": "woolworths",
+        "price": 5.35,
+        "wasPrice": null,
+        "onSpecial": false,
+        "manual": false
+      }
+    ],
+    "13938aee-a8d2-4a9c-88d7-b1c37c5f164d": [
+      {
+        "date": "2026-07-11",
+        "store": "woolworths",
+        "price": 4,
+        "wasPrice": null,
+        "onSpecial": false,
+        "manual": false
+      }
+    ],
+    "064f0333-9652-4bff-be75-0d6a3561bc82": [
+      {
+        "date": "2026-07-11",
+        "store": "woolworths",
+        "price": 5.25,
+        "wasPrice": null,
+        "onSpecial": false,
+        "manual": false
+      }
+    ],
+    "b7738501-d825-47ef-a422-a080764e8680": [
+      {
+        "date": "2026-07-11",
+        "store": "woolworths",
+        "price": 5.7,
+        "wasPrice": null,
+        "onSpecial": false,
+        "manual": false
+      }
+    ],
+    "f212887a-4095-4484-8cdd-b1b26d661bee": [
+      {
+        "date": "2026-07-11",
+        "store": "woolworths",
+        "price": 9,
+        "wasPrice": null,
+        "onSpecial": false,
+        "manual": false
+      }
+    ],
+    "2d9efe8d-bb16-49cf-b3d8-12f438ee1d19": [
+      {
+        "date": "2026-07-11",
+        "store": "woolworths",
+        "price": 10.2,
+        "wasPrice": 11.8,
+        "onSpecial": true,
         "manual": false
       }
     ]
