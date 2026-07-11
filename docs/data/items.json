@@ -170,5 +170,20 @@
       }
     },
     "upcoming": null
+  },
+  {
+    "id": "3b2d7b24-f48d-4561-8b5a-5a3fea978bdf",
+    "name": "Vita Weat",
+    "stores": {
+      "coles": {
+        "productId": "7439782",
+        "url": "https://www.coles.com.au/product/arnott's-vita-weat-9-grain-multigrain-crispbread-crackers-250g-7439782"
+      },
+      "woolworths": {
+        "productId": "97482",
+        "url": "https://www.woolworths.com.au/shop/productdetails/97482/arnott-s-vita-weat-9-grain-crispbreads"
+      }
+    },
+    "upcoming": null
   }
 ]
