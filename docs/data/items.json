@@ -110,5 +110,20 @@
       }
     },
     "upcoming": null
+  },
+  {
+    "id": "227970a4-95c6-4238-8889-7f6befef8f41",
+    "name": "Bosistos Laundry",
+    "stores": {
+      "coles": {
+        "productId": "1388780",
+        "url": "https://www.coles.com.au/product/bosisto's-power-+-laundry-liquid-2l-1388780"
+      },
+      "woolworths": {
+        "productId": "6039262",
+        "url": "https://www.woolworths.com.au/shop/productdetails/6039262/bosisto-s-power-plus-laundry-liquid"
+      }
+    },
+    "upcoming": null
   }
 ]
