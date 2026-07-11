@@ -140,5 +140,20 @@
       }
     },
     "upcoming": null
+  },
+  {
+    "id": "08ec3b44-57dc-4d3e-b221-0e426117536b",
+    "name": "Bosistos Spray",
+    "stores": {
+      "coles": {
+        "productId": "3466660",
+        "url": "https://www.coles.com.au/product/bosisto's-multipurpose-cleaner-500ml-3466660"
+      },
+      "woolworths": {
+        "productId": "1866",
+        "url": "https://www.woolworths.com.au/shop/productdetails/1866/bosisto-s-multipurpose-cleaner"
+      }
+    },
+    "upcoming": null
   }
 ]
