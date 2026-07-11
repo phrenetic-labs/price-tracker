@@ -241,5 +241,20 @@
       }
     },
     "upcoming": null
+  },
+  {
+    "id": "13938aee-a8d2-4a9c-88d7-b1c37c5f164d",
+    "name": "Condensed Milk",
+    "stores": {
+      "coles": {
+        "productId": "4727612",
+        "url": "https://www.coles.com.au/product/nestle-ambient-dairy-sweetened-condensed-milk-395g-4727612"
+      },
+      "woolworths": {
+        "productId": "105914",
+        "url": "https://www.woolworths.com.au/shop/productdetails/105914/nestle-sweetened-condensed-milk"
+      }
+    },
+    "upcoming": null
   }
 ]
