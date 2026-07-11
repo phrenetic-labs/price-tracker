@@ -256,5 +256,20 @@
       }
     },
     "upcoming": null
+  },
+  {
+    "id": "064f0333-9652-4bff-be75-0d6a3561bc82",
+    "name": "Pura Cream",
+    "stores": {
+      "coles": {
+        "productId": "5435340",
+        "url": "https://www.coles.com.au/product/pura-thick-cream-300ml-5435340"
+      },
+      "woolworths": {
+        "productId": "48124",
+        "url": "https://www.woolworths.com.au/shop/productdetails/48124/pura-thick-cream-dollop"
+      }
+    },
+    "upcoming": null
   }
 ]
