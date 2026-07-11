@@ -73,5 +73,20 @@
       }
     },
     "upcoming": null
+  },
+  {
+    "id": "11c8c897-c2d6-46eb-8deb-c5cbb8143421",
+    "name": "Maesri Red Curry Paste",
+    "stores": {
+      "coles": {
+        "productId": "1323800",
+        "url": "https://www.coles.com.au/product/maesri-red-curry-paste-114g-1323800"
+      },
+      "woolworths": {
+        "productId": "45458",
+        "url": "https://www.woolworths.com.au/shop/productdetails/45458/maesri-paste-red-curry"
+      }
+    },
+    "upcoming": null
   }
 ]
