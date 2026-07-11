@@ -88,5 +88,16 @@
       }
     },
     "upcoming": null
+  },
+  {
+    "id": "440e8ba7-5353-4d7f-b0aa-8c1af89ad09f",
+    "name": "Tilda Basmati Rice",
+    "stores": {
+      "woolworths": {
+        "productId": "95413",
+        "url": "https://www.woolworths.com.au/shop/productdetails/95413/tilda-pure-original-basmati-rice"
+      }
+    },
+    "upcoming": null
   }
 ]
