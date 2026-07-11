@@ -286,5 +286,20 @@
       }
     },
     "upcoming": null
+  },
+  {
+    "id": "f212887a-4095-4484-8cdd-b1b26d661bee",
+    "name": "Fabric Softener",
+    "stores": {
+      "coles": {
+        "productId": "1019332",
+        "url": "https://www.coles.com.au/product/comfort-amazon-fabric-conditioner-bergamot-and-sandalwood-800ml-1019332"
+      },
+      "woolworths": {
+        "productId": "6019649",
+        "url": "https://www.woolworths.com.au/shop/productdetails/6019649/comfort-laundry-fabric-conditioner-liquid-marrakesh"
+      }
+    },
+    "upcoming": null
   }
 ]
