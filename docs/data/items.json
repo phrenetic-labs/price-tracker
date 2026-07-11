@@ -28,5 +28,20 @@
       }
     },
     "upcoming": null
+  },
+  {
+    "id": "510adcd6-cd45-476a-9e51-8b5cf3055415",
+    "name": "McCain Hash Browns",
+    "stores": {
+      "coles": {
+        "productId": "8217844",
+        "url": "https://www.coles.com.au/product/mccain-frozen-hash-browns-750g-8217844"
+      },
+      "woolworths": {
+        "productId": "98299",
+        "url": "https://www.woolworths.com.au/shop/productdetails/98299/mccain-hash-browns-shredded"
+      }
+    },
+    "upcoming": null
   }
 ]
