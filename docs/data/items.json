@@ -271,5 +271,20 @@
       }
     },
     "upcoming": null
+  },
+  {
+    "id": "b7738501-d825-47ef-a422-a080764e8680",
+    "name": "Cream Cheese",
+    "stores": {
+      "coles": {
+        "productId": "192502",
+        "url": "https://www.coles.com.au/product/philadelphia-original-cream-cheese-block-250g-192502"
+      },
+      "woolworths": {
+        "productId": "48062",
+        "url": "https://www.woolworths.com.au/shop/productdetails/48062/philadelphia-original-cream-cheese-block"
+      }
+    },
+    "upcoming": null
   }
 ]
