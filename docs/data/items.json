@@ -316,5 +316,20 @@
       }
     },
     "upcoming": null
+  },
+  {
+    "id": "0587aed5-aef4-4090-addc-cb7b5196fac2",
+    "name": "White King Toilet Gel",
+    "stores": {
+      "coles": {
+        "productId": "6419382",
+        "url": "https://www.coles.com.au/product/white-king-toilet-gel-with-stain-remover-lavender-700ml-6419382"
+      },
+      "woolworths": {
+        "productId": "166512",
+        "url": "https://www.woolworths.com.au/shop/productdetails/166512/white-king-toilet-gel-with-added-stain-remover-lavender"
+      }
+    },
+    "upcoming": null
   }
 ]
