@@ -331,5 +331,20 @@
       }
     },
     "upcoming": null
+  },
+  {
+    "id": "8b80bec8-9041-4602-9f47-a4941a0dc90d",
+    "name": "Newmans Own Caesar",
+    "stores": {
+      "coles": {
+        "productId": "9821298",
+        "url": "https://www.coles.com.au/product/paul-newman's-own-creamy-caesar-dressing-250ml-9821298"
+      },
+      "woolworths": {
+        "productId": "213198",
+        "url": "https://www.woolworths.com.au/shop/productdetails/213198/paul-newman-s-own-dressings-creamy-caesar"
+      }
+    },
+    "upcoming": null
   }
 ]
