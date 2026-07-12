@@ -161,12 +161,17 @@
 <dialog id="bmDialog">
   <h3>🔖 Bookmarklet refresher</h3>
   <p class="sub" style="margin-top:6px">
-    For browsers without Tampermonkey (e.g. <b>Opera</b>). Runs <b>inside</b> the
-    Coles/Woolworths page in your own browser — reads prices, then hands them back
-    to this app to save (store pages block direct GitHub calls, so the app does the
-    commit). No token in the bookmark. Re-copy it after adding/removing items.
+    For browsers without Tampermonkey (e.g. <b>Opera</b>). Install the bookmarklet
+    <b>once</b> — it never needs updating. To sync all prices in one go, tap a
+    <b>Sync</b> button below: it opens the store with your item list, then you tap
+    the bookmarklet once and it grabs every price and saves them here. No token in
+    the bookmark.
   </p>
-  <label>Bookmarklet code (bookmark URL)</label>
+  <div class="row">
+    <button class="small" id="syncColes" style="background:var(--coles)">Sync Coles →</button>
+    <button class="small" id="syncWow" style="background:var(--woolworths)">Sync Woolworths →</button>
+  </div>
+  <label style="margin-top:14px">Bookmarklet code (install once)</label>
   <input id="bmCode" readonly onclick="this.select()">
   <div class="row">
     <button class="small" id="bmCopy">Copy code</button>
@@ -174,11 +179,13 @@
   </div>
   <p class="sub" style="margin-top:12px">
     <b>Set up (once):</b> Desktop — drag the link to the bookmarks bar.
-    Android/Opera — bookmark any page, then edit it: name it <i>Push prices</i>,
+    Android/Opera — bookmark any page, then edit it: name it <i>PT Sync</i>,
     paste the code as the URL.<br><br>
-    <b>Use:</b> open <b>coles.com.au</b> or <b>woolworths.com.au</b>, tap the bookmark
-    (Opera/Android: type <i>Push prices</i> in the address bar, tap it). It reads
-    prices, then bounces you to this app which saves them.
+    <b>Use:</b> tap <b>Sync Coles</b> (or Woolworths) above → the store opens (solve
+    the "I am human" check if shown) → tap your <i>PT Sync</i> bookmark once → it
+    reads every tracked price and bounces back here to save them. New items are
+    included automatically. Tip: if opened directly on a single product page, the
+    bookmarklet just grabs that one item.
   </p>
   <div class="row" style="justify-content:flex-end">
     <button class="ghost" onclick="bmDialog.close()">Close</button>
@@ -579,39 +586,49 @@ $('saveItemBtn').onclick = async () => {
  *      subject to connect-src CSP — and the app commits from its own origin.
  */
 function bmSource() {
-  // Bake a compact item list: [id, colesProductId|0, wowProductId|0]
-  const baked = ITEMS.map((i) => [
-    i.id,
-    (i.stores.coles && i.stores.coles.productId) || 0,
-    (i.stores.woolworths && i.stores.woolworths.productId) || 0,
-  ]);
+  // GENERIC bookmarklet — install once, never update. It reads the item list
+  // from the URL hash the app puts there ("Sync" buttons below), batch-reads
+  // every price same-origin, and hands them back to the app to save. If tapped
+  // on a store page WITHOUT a sync list, it falls back to capturing just the
+  // product page you're viewing. Only the (constant) app URL is baked in.
   const APP = location.origin + location.pathname.replace(/[^/]*$/, '');
-  return "(async()=>{const APP=" + JSON.stringify(APP) + ",IT=" + JSON.stringify(baked) + ";" +
+  return "(async()=>{const APP=" + JSON.stringify(APP) + ";" +
+    "const enc=o=>btoa(unescape(encodeURIComponent(JSON.stringify(o))));" +
+    "const dec=s=>JSON.parse(decodeURIComponent(escape(atob(s))));" +
     "const h=location.hostname;const store=h.includes('coles')?'coles':h.includes('woolworths')?'woolworths':null;" +
-    "if(!store){alert('Open coles.com.au or woolworths.com.au first, then tap the bookmark.');return;}" +
-    "const idx=store==='coles'?1:2;const list=IT.filter(r=>r[idx]).map(r=>({id:r[0],pid:r[idx]}));" +
-    "if(!list.length){alert('No '+store+' items tracked.');return;}" +
-    // recursive price finder for Coles __NEXT_DATA__
-    "const findP=(o,d)=>{if(!o||typeof o!=='object'||d>6)return null;const p=o.pricing||o.price;" +
-    "if(p&&typeof p==='object'){const now=p.now!=null?p.now:(p.value!=null?p.value:null);" +
-    "if(now!=null&&!isNaN(+now))return{now:+now,was:p.was!=null?+p.was:(p.wasPrice!=null?+p.wasPrice:null),promo:p.specialType||p.promotionType||p.onPromotion};}" +
-    "for(const k in o){const hit=findP(o[k],d+1);if(hit)return hit;}return null;};" +
+    "if(!store){alert('Open Coles or Woolworths first, then tap this.');return;}" +
+    "const ldPrice=t=>{const re=/<script[^>]*type=\"application\\/ld\\+json\"[^>]*>([\\s\\S]*?)<\\/script>/gi;let m,best=null;" +
+    "while((m=re.exec(t))){try{const j=JSON.parse(m[1]);const a=Array.isArray(j)?j:[j];" +
+    "for(const n of a){const o=n&&n.offers&&(Array.isArray(n.offers)?n.offers[0]:n.offers);if(o&&o.price!=null)best=Number(o.price);}}catch(e){}}return best;};" +
+    // grab one product's price by id, same-origin
+    "const grab=async pid=>{if(store==='woolworths'){const r=await fetch('/apis/ui/product/detail/'+pid+'?isMobile=false',{headers:{accept:'application/json'}});" +
+    "if(!r.ok)throw new Error('HTTP '+r.status);const p=(await r.json()).Product;if(!p||p.Price==null)throw new Error('no price');" +
+    "return{price:p.Price,wasPrice:p.WasPrice>p.Price?p.WasPrice:null,onSpecial:!!p.IsOnSpecial};}" +
+    "const r=await fetch('/product/p-'+pid,{headers:{accept:'text/html'}});if(!r.ok)throw new Error('HTTP '+r.status);const html=await r.text();" +
+    "if(/additional security check|hcaptcha|imperva/i.test(html))throw new Error('security check');" +
+    "const pr=ldPrice(html);if(pr==null)throw new Error('no price');return{price:pr,wasPrice:null,onSpecial:false};};" +
+    // read sync list from hash, else current-page fallback
+    "let ids=null;const hm=location.hash.match(/ptsync=([^&]+)/);" +
+    "if(hm){try{const d=dec(hm[1]);if(d.store===store)ids=d.ids;}catch(e){}}" +
     "const snaps=[];const fails=[];" +
-    "for(const it of list){try{let s=null;" +
-    "if(store==='woolworths'){const r=await fetch('/apis/ui/product/detail/'+it.pid+'?isMobile=false',{headers:{accept:'application/json'}});" +
-    "if(!r.ok)throw new Error('HTTP '+r.status);const p=(await r.json()).Product;" +
-    "if(p&&p.Price!=null)s={price:p.Price,wasPrice:p.WasPrice>p.Price?p.WasPrice:null,onSpecial:!!p.IsOnSpecial};else throw new Error('no price');}" +
-    "else{const r=await fetch('/product/p-'+it.pid,{headers:{accept:'text/html'}});" +
-    "if(!r.ok)throw new Error('HTTP '+r.status);const html=await r.text();" +
-    "if(/additional security check|hcaptcha|imperva/i.test(html))throw new Error('security check — solve it then retry');" +
-    "const m=html.match(/<script id=\"__NEXT_DATA__\"[^>]*>([\\s\\S]*?)<\\/script>/);if(!m)throw new Error('no data');" +
-    "const pr=(JSON.parse(m[1]).props||{}).pageProps||{};const hit=findP(pr.product||pr,0);" +
-    "if(hit)s={price:hit.now,wasPrice:hit.was&&hit.was>hit.now?hit.was:null,onSpecial:!!(hit.promo||(hit.was>hit.now))};else throw new Error('no price');}" +
-    "if(s)snaps.push({itemId:it.id,store:store,price:s.price,wasPrice:s.wasPrice,onSpecial:s.onSpecial});" +
-    "await new Promise(z=>setTimeout(z,400));}catch(e){fails.push(it.pid+': '+e.message);}}" +
-    "if(!snaps.length){alert(store+': captured 0/'+list.length+(fails[0]?(' — '+fails[0]):''));return;}" +
-    "const payload=btoa(unescape(encodeURIComponent(JSON.stringify({store:store,snaps:snaps}))));" +
-    "location.href=APP+'#snapshot='+payload;})();";
+    "if(ids&&ids.length){for(const pid of ids){try{const s=await grab(pid);snaps.push({productId:String(pid),price:s.price,wasPrice:s.wasPrice,onSpecial:s.onSpecial});}catch(e){fails.push(pid+': '+e.message);}await new Promise(z=>setTimeout(z,350));}}" +
+    "else{const m=location.pathname.match(store==='coles'?/-(\\d+)(?:$|[\\/?#])/:/productdetails\\/(\\d+)/);" +
+    "if(!m){alert('Open a product page, or use the Sync buttons in the app.');return;}" +
+    "try{const s=await grab(m[1]);snaps.push({productId:m[1],price:s.price,wasPrice:s.wasPrice,onSpecial:s.onSpecial});}catch(e){alert(store+': '+e.message);return;}}" +
+    "if(!snaps.length){alert(store+': captured 0'+(fails[0]?(' — '+fails[0]):''));return;}" +
+    "location.href=APP+'#snapshot='+enc({store:store,snaps:snaps});})();";
+}
+
+// Launch a store sync: open the store with this store's product IDs in the hash,
+// so the generic bookmarklet can batch-read them.
+function launchSync(store) {
+  const ids = ITEMS
+    .filter((i) => i.stores[store] && i.stores[store].productId)
+    .map((i) => String(i.stores[store].productId));
+  if (!ids.length) { toast(`No ${STORE_LABEL[store]} items to sync`); return; }
+  const home = store === 'coles' ? 'https://www.coles.com.au/' : 'https://www.woolworths.com.au/';
+  const payload = btoa(unescape(encodeURIComponent(JSON.stringify({ store, ids }))));
+  location.href = `${home}#ptsync=${payload}`;
 }
 
 $('bmBtn').onclick = () => {
@@ -625,6 +642,8 @@ $('bmCopy').onclick = async () => {
   await navigator.clipboard.writeText($('bmCode').value);
   toast('Bookmarklet copied ✔');
 };
+$('syncColes').onclick = () => launchSync('coles');
+$('syncWow').onclick = () => launchSync('woolworths');
 
 /* ------------------------------------ incoming bookmarklet snapshot */
 async function applyIncomingSnapshot() {
@@ -636,21 +655,38 @@ async function applyIncomingSnapshot() {
   let payload;
   try {
     payload = JSON.parse(decodeURIComponent(escape(atob(m[1]))));
-  } catch (e) { toast('Could not read incoming prices'); return false; }
-  const snaps = (payload && payload.snaps) || [];
-  if (!snaps.length) return false;
+  } catch (e) { toast('Could not read incoming price'); return false; }
+  const store = payload && payload.store;
+
+  // Collect raw snaps (may carry itemId, productId, or be a single page)
+  const raw = payload.page ? [payload.page] : (payload.snaps || []);
+  if (!raw.length) return false;
+
+  // Resolve each to a tracked itemId (by itemId, else by productId)
+  const byProduct = (pid) =>
+    ITEMS.find((i) => i.stores[store] && String(i.stores[store].productId) === String(pid));
+  const resolved = [];
+  let unmatched = 0;
+  for (const s of raw) {
+    if (typeof s.price !== 'number') continue;
+    const it = s.itemId ? ITEMS.find((i) => i.id === s.itemId) : byProduct(s.productId);
+    if (!it) { unmatched++; continue; }
+    resolved.push({ itemId: it.id, price: s.price, wasPrice: s.wasPrice, onSpecial: s.onSpecial });
+  }
+  if (!resolved.length) {
+    toast(`No prices matched your tracked ${store} items${unmatched ? ` (${unmatched} unmatched)` : ''}`);
+    return true;
+  }
+
   try {
     await ghRead('prices.json').then((p) => { PRICES = p; PRICES.history = PRICES.history || {}; });
     const date = todayISO();
-    let n = 0;
-    for (const s of snaps) {
-      if (typeof s.price !== 'number') continue;
-      appendSnap(s.itemId, s.store, { price: s.price, wasPrice: s.wasPrice, onSpecial: s.onSpecial }, date);
-      n++;
+    for (const s of resolved) {
+      appendSnap(s.itemId, store, { price: s.price, wasPrice: s.wasPrice, onSpecial: s.onSpecial }, date);
     }
     PRICES.lastRefresh = new Date().toISOString();
-    await savePrices(`Bookmarklet prices (${payload.store})`);
-    toast(`Saved ${n} ${payload.store} price(s) from the bookmarklet ✔`);
+    await savePrices(`Bookmarklet prices (${store})`);
+    toast(`Saved ${resolved.length} ${STORE_LABEL[store]} price(s)${unmatched ? ` · ${unmatched} unmatched` : ''} ✔`);
   } catch (e) { toast('Save failed: ' + e.message); }
   return true;
 }

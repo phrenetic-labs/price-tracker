@@ -25,6 +25,10 @@ scraper/scrape.js      ← Playwright scraper, run by Actions
 - **Scraping:** the workflow runs headless Chromium via Playwright, loads each store's site so the bot-protection JS executes, then fetches your products' prices *from inside the page* (same-origin) and commits `prices.json`. Runs Monday ~5pm and Wednesday ~8am AEST, plus whenever you hit **Refresh** in the app (`workflow_dispatch`).
 - **Bot-blocking reality:** Actions runners are datacenter IPs. Woolworths works from CI; **Coles is behind Imperva + hCaptcha and blocks the runner** (it serves an "I am human" page instead of data). No amount of server-side stealth clears that — it's an IP-reputation + CAPTCHA wall, deliberately. The clean fix is to read Coles prices in *your own browser*, where you genuinely are a human on a residential connection: the userscript (below) or the 🔖 bookmarklet. Manual entry (✏️) is the always-works fallback.
 
+## Bookmarklet (Opera / no-extension browsers)
+
+Install the bookmarklet **once** (from the 🔖 dialog) — it's generic and never needs re-copying, even when you add items. To pull all prices: in the app tap **Sync Coles** (or **Sync Woolworths**); the store opens with your item list carried in the URL. Solve the "I am human" check if Coles shows it, then tap your **PT Sync** bookmark once — it reads every tracked price same-origin and bounces back to the app, which saves them. New items are included automatically. Opened directly on a single product page, the bookmarklet just grabs that one item. (Store pages block direct GitHub calls via CSP, so the app does the commit; that's why it bounces back.)
+
 ## Userscript (hands-off capture in your own browser)
 
 The userscript reads prices while you browse the stores normally — same session, your device, your IP — and commits them to the repo. This is the recommended path for Coles.

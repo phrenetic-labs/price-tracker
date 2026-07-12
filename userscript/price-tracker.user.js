@@ -154,30 +154,47 @@
     return null;
   }
 
+  // Pull a price out of any JSON-LD Product/Offer blocks in the HTML.
+  function priceFromJsonLd(html) {
+    const re = /<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi;
+    let m;
+    while ((m = re.exec(html))) {
+      try {
+        const j = JSON.parse(m[1]);
+        const nodes = Array.isArray(j) ? j : [j];
+        for (const n of nodes) {
+          const offer = n && n.offers && (Array.isArray(n.offers) ? n.offers[0] : n.offers);
+          if (offer && offer.price != null) {
+            return { now: Number(offer.price), was: null, promo: false };
+          }
+        }
+      } catch (e) { /* next block */ }
+    }
+    return null;
+  }
+
   async function priceColes(id) {
-    // Fetch the real product page HTML (same as a browser navigation) and
-    // read the embedded __NEXT_DATA__ JSON — includes the rendered price.
+    // Fetch the real product page HTML (same as a browser navigation).
     const r = await fetch(`/product/p-${id}`, { headers: { accept: 'text/html' } });
     if (!r.ok) throw new Error('page HTTP ' + r.status);
     const html = await r.text();
     if (/additional security check|hcaptcha|imperva/i.test(html)) {
       throw new Error('security-check page — solve the “I am human” box, then retry');
     }
+    // 1) legacy __NEXT_DATA__ (Pages Router)
     const m = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/);
-    if (!m) throw new Error('no __NEXT_DATA__ in page');
-    let data;
-    try {
-      data = JSON.parse(m[1]);
-    } catch (e) {
-      throw new Error('could not parse page data');
+    if (m) {
+      try {
+        const data = JSON.parse(m[1]);
+        const product = data.props && data.props.pageProps && data.props.pageProps.product;
+        const hit = findColesPricing(product || data.props, 0);
+        if (hit) return snap(hit.now, hit.was, hit.promo);
+      } catch (e) { /* fall through */ }
     }
-    const product = data.props && data.props.pageProps && data.props.pageProps.product;
-    const hit = findColesPricing(product || data.props, 0);
-    if (!hit) {
-      const keys = product && product.pricing ? Object.keys(product.pricing).join(',') : 'none';
-      throw new Error('no price (pricing keys: ' + keys + ')');
-    }
-    return snap(hit.now, hit.was, hit.promo);
+    // 2) JSON-LD (App Router server-renders this)
+    const ld = priceFromJsonLd(html);
+    if (ld) return snap(ld.now, ld.was, ld.promo);
+    throw new Error('no price found in page');
   }
 
   async function priceWoolworths(id) {
