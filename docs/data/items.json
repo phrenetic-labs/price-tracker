@@ -346,5 +346,16 @@
       }
     },
     "upcoming": null
+  },
+  {
+    "id": "8f57aa3f-75fb-43f3-8016-1b67383f6abf",
+    "name": "King Island Camembert",
+    "stores": {
+      "woolworths": {
+        "productId": "6576",
+        "url": "https://www.woolworths.com.au/shop/productdetails/6576/king-island-dairy-phoques-cove-camembert-cheese"
+      }
+    },
+    "upcoming": null
   }
 ]
