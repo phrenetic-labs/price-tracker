@@ -331,16 +331,5 @@
       }
     },
     "upcoming": null
-  },
-  {
-    "id": "ab4f09ff-92d4-4b03-95d9-fa591ad2c1c4",
-    "name": "Newmans Own Caesar",
-    "stores": {
-      "coles": {
-        "productId": "9821298",
-        "url": "https://www.coles.com.au/product/paul-newman's-own-creamy-caesar-dressing-250ml-9821298"
-      }
-    },
-    "upcoming": null
   }
 ]
