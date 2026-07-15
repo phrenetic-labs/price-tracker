@@ -597,25 +597,31 @@ function bmSource() {
     "const dec=s=>JSON.parse(decodeURIComponent(escape(atob(s))));" +
     "const h=location.hostname;const store=h.includes('coles')?'coles':h.includes('woolworths')?'woolworths':null;" +
     "if(!store){alert('Open Coles or Woolworths first, then tap this.');return;}" +
+    "const sleep=ms=>new Promise(z=>setTimeout(z,ms));" +
     "const ldPrice=t=>{const re=/<script[^>]*type=\"application\\/ld\\+json\"[^>]*>([\\s\\S]*?)<\\/script>/gi;let m,best=null;" +
     "while((m=re.exec(t))){try{const j=JSON.parse(m[1]);const a=Array.isArray(j)?j:[j];" +
     "for(const n of a){const o=n&&n.offers&&(Array.isArray(n.offers)?n.offers[0]:n.offers);if(o&&o.price!=null)best=Number(o.price);}}catch(e){}}return best;};" +
+    "const emb=t=>{const u=t.replace(/\\\\\"/g,'\"');const m=u.match(/\"pricing\":\\{[^}]*?\"now\":\\s*([0-9]+(?:\\.[0-9]+)?)/);" +
+    "if(!m)return null;const now=Number(m[1]);const w=u.match(/\"pricing\":\\{[^}]*?\"was\":\\s*([0-9]+(?:\\.[0-9]+)?)/);" +
+    "const was=w?Number(w[1]):null;return{price:now,wasPrice:was&&was>now?was:null,onSpecial:!!(was&&was>now)};};" +
     // grab one product's price by id, same-origin
     "const grab=async pid=>{if(store==='woolworths'){const r=await fetch('/apis/ui/product/detail/'+pid+'?isMobile=false',{headers:{accept:'application/json'}});" +
     "if(!r.ok)throw new Error('HTTP '+r.status);const p=(await r.json()).Product;if(!p||p.Price==null)throw new Error('no price');" +
     "return{price:p.Price,wasPrice:p.WasPrice>p.Price?p.WasPrice:null,onSpecial:!!p.IsOnSpecial};}" +
     "const r=await fetch('/product/p-'+pid,{headers:{accept:'text/html'}});if(!r.ok)throw new Error('HTTP '+r.status);const html=await r.text();" +
-    "if(/additional security check|hcaptcha|imperva/i.test(html))throw new Error('security check');" +
-    "const pr=ldPrice(html);if(pr==null)throw new Error('no price');return{price:pr,wasPrice:null,onSpecial:false};};" +
+    "if(/additional security check|hcaptcha|imperva|pardon our interruption|access denied/i.test(html))throw new Error('bot-check (throttled)');" +
+    "const pr=ldPrice(html);if(pr!=null)return{price:pr,wasPrice:null,onSpecial:false};" +
+    "const em=emb(html);if(em)return em;throw new Error('no price');};" +
     // read sync list from hash, else current-page fallback
     "let ids=null;const hm=location.hash.match(/ptsync=([^&]+)/);" +
     "if(hm){try{const d=dec(hm[1]);if(d.store===store)ids=d.ids;}catch(e){}}" +
-    "const snaps=[];const fails=[];" +
-    "if(ids&&ids.length){for(const pid of ids){try{const s=await grab(pid);snaps.push({productId:String(pid),price:s.price,wasPrice:s.wasPrice,onSpecial:s.onSpecial});}catch(e){fails.push(pid+': '+e.message);}await new Promise(z=>setTimeout(z,350));}}" +
+    "const snaps=[];const done={};" +
+    "if(ids&&ids.length){let pend=[];for(const pid of ids){try{const s=await grab(pid);done[pid]=1;snaps.push({productId:String(pid),price:s.price,wasPrice:s.wasPrice,onSpecial:s.onSpecial});}catch(e){pend.push(pid);}await sleep(700+Math.random()*600);}" +
+    "if(pend.length){await sleep(4000);for(const pid of pend){try{const s=await grab(pid);snaps.push({productId:String(pid),price:s.price,wasPrice:s.wasPrice,onSpecial:s.onSpecial});}catch(e){}await sleep(1200+Math.random()*700);}}}" +
     "else{const m=location.pathname.match(store==='coles'?/-(\\d+)(?:$|[\\/?#])/:/productdetails\\/(\\d+)/);" +
     "if(!m){alert('Open a product page, or use the Sync buttons in the app.');return;}" +
     "try{const s=await grab(m[1]);snaps.push({productId:m[1],price:s.price,wasPrice:s.wasPrice,onSpecial:s.onSpecial});}catch(e){alert(store+': '+e.message);return;}}" +
-    "if(!snaps.length){alert(store+': captured 0'+(fails[0]?(' — '+fails[0]):''));return;}" +
+    "if(!snaps.length){alert(store+': captured 0');return;}" +
     "location.href=APP+'#snapshot='+enc({store:store,snaps:snaps});})();";
 }
 

@@ -173,13 +173,24 @@
     return null;
   }
 
+  // Pull pricing out of the App Router streamed payload embedded in the HTML.
+  function priceFromEmbedded(html) {
+    const un = html.replace(/\\"/g, '"'); // un-escape RSC-escaped JSON
+    const m = un.match(/"pricing":\{[^}]*?"now":\s*([0-9]+(?:\.[0-9]+)?)/);
+    if (!m) return null;
+    const now = Number(m[1]);
+    const wm = un.match(/"pricing":\{[^}]*?"was":\s*([0-9]+(?:\.[0-9]+)?)/);
+    const was = wm ? Number(wm[1]) : null;
+    return { now, was, promo: was != null && was > now };
+  }
+
   async function priceColes(id) {
     // Fetch the real product page HTML (same as a browser navigation).
     const r = await fetch(`/product/p-${id}`, { headers: { accept: 'text/html' } });
     if (!r.ok) throw new Error('page HTTP ' + r.status);
     const html = await r.text();
-    if (/additional security check|hcaptcha|imperva/i.test(html)) {
-      throw new Error('security-check page — solve the “I am human” box, then retry');
+    if (/additional security check|hcaptcha|imperva|pardon our interruption|access denied/i.test(html)) {
+      throw new Error('bot-check page (throttled)');
     }
     // 1) legacy __NEXT_DATA__ (Pages Router)
     const m = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/);
@@ -191,10 +202,13 @@
         if (hit) return snap(hit.now, hit.was, hit.promo);
       } catch (e) { /* fall through */ }
     }
-    // 2) JSON-LD (App Router server-renders this)
+    // 2) JSON-LD (server-rendered)
     const ld = priceFromJsonLd(html);
     if (ld) return snap(ld.now, ld.was, ld.promo);
-    throw new Error('no price found in page');
+    // 3) embedded App Router pricing payload
+    const em = priceFromEmbedded(html);
+    if (em) return snap(em.now, em.was, em.promo);
+    throw new Error(html.length < 20000 ? 'no price (short page — likely throttled)' : 'no price in page');
   }
 
   async function priceWoolworths(id) {
@@ -253,21 +267,41 @@
       prices.data.history = prices.data.history || {};
       const date = todayISO();
       let n = 0;
-      const fails = [];
+      const record = (it, s) => {
+        const rows = (prices.data.history[it.id] || []).filter(
+          (h) => !(h.date === date && h.store === store)
+        );
+        rows.push({ date, store, price: s.price, wasPrice: s.wasPrice, onSpecial: s.onSpecial, manual: false });
+        rows.sort((a, b) => (a.date < b.date ? -1 : 1));
+        prices.data.history[it.id] = rows;
+        n++;
+      };
+      const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+      // First pass — gentle pacing to avoid tripping bot protection
+      let pending = [];
       for (const it of list) {
         try {
-          const s = await PRICER[store](it.stores[store].productId);
-          const rows = (prices.data.history[it.id] || []).filter(
-            (h) => !(h.date === date && h.store === store)
-          );
-          rows.push({ date, store, price: s.price, wasPrice: s.wasPrice, onSpecial: s.onSpecial, manual: false });
-          rows.sort((a, b) => (a.date < b.date ? -1 : 1));
-          prices.data.history[it.id] = rows;
-          n++;
-          await new Promise((r) => setTimeout(r, 500 + Math.random() * 500));
+          record(it, await PRICER[store](it.stores[store].productId));
         } catch (e) {
-          fails.push(`${it.name}: ${e.message}`);
+          pending.push(it);
           console.warn('[Price Tracker]', it.name, '→', e.message);
+        }
+        await sleep(900 + Math.random() * 700);
+        toast(`Reading ${store}… ${n}/${list.length}`, true);
+      }
+
+      // Retry pass for the ones that missed (usually throttle blips)
+      const fails = [];
+      if (pending.length) {
+        await sleep(4000);
+        for (const it of pending) {
+          try {
+            record(it, await PRICER[store](it.stores[store].productId));
+          } catch (e) {
+            fails.push(`${it.name}: ${e.message}`);
+          }
+          await sleep(1400 + Math.random() * 800);
         }
       }
       if (n) {
