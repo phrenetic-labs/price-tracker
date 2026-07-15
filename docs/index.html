@@ -122,6 +122,23 @@
   </div>
 </dialog>
 
+<!-- Edit item dialog -->
+<dialog id="editDialog">
+  <h3>Edit item</h3>
+  <label>Item name</label>
+  <input id="editName">
+  <label>Coles product URL or ID (blank to remove)</label>
+  <input id="editColes" placeholder="https://www.coles.com.au/product/…  or  1234567">
+  <label>Woolworths product URL or ID (blank to remove)</label>
+  <input id="editWow" placeholder="https://www.woolworths.com.au/shop/productdetails/…  or  123456">
+  <p class="sub" style="margin-top:8px">Changing a store URL/ID re-points tracking; existing price history stays. Clearing a field stops tracking that store.</p>
+  <div class="err" id="editErr"></div>
+  <div class="row" style="justify-content:flex-end">
+    <button class="ghost" onclick="editDialog.close()">Cancel</button>
+    <button id="editSave">Save changes</button>
+  </div>
+</dialog>
+
 <!-- Upcoming special dialog (Monday catalogue workflow) -->
 <dialog id="upcomingDialog">
   <h3>Log upcoming special (from catalogue)</h3>
@@ -379,6 +396,7 @@ function render() {
         <button class="small ghost" data-act="chart">📈 History</button>
         <button class="small ghost" data-act="upcoming">📖 Log upcoming</button>
         <button class="small ghost" data-act="manual">✏️ Manual price</button>
+        <button class="small ghost" data-act="edit">✎ Edit</button>
         <button class="small ghost" data-act="delete" style="margin-left:auto">🗑</button>
       </div>
       <div class="chart-wrap" id="chart-${item.id}"><div class="chart-box"><canvas></canvas></div>
@@ -461,7 +479,41 @@ function onAction(act, item) {
     $('mPrice').value = ''; $('mWas').value = ''; $('mSpecial').checked = false;
     manualDialog.showModal();
   }
+  if (act === 'edit') {
+    $('editName').value = item.name;
+    $('editColes').value = (item.stores.coles && (item.stores.coles.url || item.stores.coles.productId)) || '';
+    $('editWow').value = (item.stores.woolworths && (item.stores.woolworths.url || item.stores.woolworths.productId)) || '';
+    $('editErr').textContent = '';
+    editDialog.showModal();
+  }
 }
+
+$('editSave').onclick = async () => {
+  const name = $('editName').value.trim();
+  if (!name) { $('editErr').textContent = 'Name is required.'; return; }
+  const coles = parseProduct('coles', $('editColes').value);
+  const wow = parseProduct('woolworths', $('editWow').value);
+  if (coles === undefined || wow === undefined) {
+    $('editErr').textContent = 'Could not find a product ID in that URL — paste the full product page URL, or leave blank to remove.';
+    return;
+  }
+  dialogItem.name = name;
+  const stores = {};
+  if (coles) stores.coles = coles;
+  if (wow) stores.woolworths = wow;
+  // keep at least a placeholder so the item stays visible if both cleared
+  if (!stores.coles && !stores.woolworths) {
+    stores.coles = { productId: null, name, url: null };
+    stores.woolworths = { productId: null, name, url: null };
+  }
+  dialogItem.stores = stores;
+  editDialog.close();
+  try {
+    await saveItems(`Edit ${name}`);
+    render();
+    toast('Item updated ✔');
+  } catch (e) { toast(e.message); }
+};
 
 $('upSave').onclick = () => {
   const price = parseFloat($('upPrice').value);
