@@ -29,6 +29,9 @@
   button:disabled { opacity: .5; cursor: default; }
   .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; margin: 12px 0; }
   .card.special { border-color: var(--special); box-shadow: 0 0 0 1px var(--special); }
+  .card.stashed { opacity: .6; }
+  .stash-bar { display: none; align-items: center; gap: 8px; margin: 8px 0 2px; padding: 8px 12px; background: var(--card2); border: 1px solid var(--border); border-radius: 10px; font-size: .82rem; color: var(--muted); cursor: pointer; }
+  .stash-bar.show { display: flex; }
   .item-top { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
   .item-top h3 { font-size: 1rem; flex: 1; min-width: 140px; }
   .badge { font-size: .68rem; font-weight: 700; padding: 3px 8px; border-radius: 999px; letter-spacing: .3px; }
@@ -76,6 +79,8 @@
   </div>
   <div class="banner" id="dayBanner"></div>
   <div id="items"></div>
+  <div class="stash-bar" id="stashBar"></div>
+  <div id="stashItems"></div>
   <div class="empty" id="empty" style="display:none">
     No items yet. Tap <b>+</b> to add something you buy regularly.
   </div>
@@ -356,14 +361,22 @@ function render() {
     ? 'updated ' + new Date(PRICES.lastRefresh).toLocaleString('en-AU', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })
     : '';
   const wrap = $('items');
+  const stashWrap = $('stashItems');
   wrap.innerHTML = '';
+  stashWrap.innerHTML = '';
   $('empty').style.display = ITEMS.length ? 'none' : 'block';
 
+  const stashedCount = ITEMS.filter((i) => i.stashed).length;
+  const bar = $('stashBar');
+  bar.className = 'stash-bar' + (stashedCount ? ' show' : '');
+  bar.textContent = `📦 ${stashedCount} stashed (well-stocked) — tap to ${showStashed ? 'hide' : 'show'}`;
+
   for (const item of ITEMS) {
+    if (item.stashed && !showStashed) continue;
     const v = verdict(item);
     const anySpecial = STORES.some((s) => (latest(item, s) || {}).onSpecial);
     const card = document.createElement('div');
-    card.className = 'card' + (anySpecial ? ' special' : '');
+    card.className = 'card' + (anySpecial ? ' special' : '') + (item.stashed ? ' stashed' : '');
 
     let priceBoxes = '';
     for (const s of STORES) {
@@ -397,6 +410,7 @@ function render() {
         <button class="small ghost" data-act="upcoming">📖 Log upcoming</button>
         <button class="small ghost" data-act="manual">✏️ Manual price</button>
         <button class="small ghost" data-act="edit">✎ Edit</button>
+        <button class="small ghost" data-act="stash">${item.stashed ? '↩ Unstash' : '📦 Stash'}</button>
         <button class="small ghost" data-act="delete" style="margin-left:auto">🗑</button>
       </div>
       <div class="chart-wrap" id="chart-${item.id}"><div class="chart-box"><canvas></canvas></div>
@@ -405,9 +419,12 @@ function render() {
     card.querySelectorAll('[data-act]').forEach((btn) =>
       btn.addEventListener('click', () => onAction(btn.dataset.act, item))
     );
-    wrap.appendChild(card);
+    (item.stashed ? stashWrap : wrap).appendChild(card);
   }
 }
+
+let showStashed = false;
+$('stashBar').onclick = () => { showStashed = !showStashed; render(); };
 
 /* ------------------------------------------------------------ charts */
 function toggleChart(item) {
@@ -478,6 +495,10 @@ function onAction(act, item) {
     $('manualItemName').textContent = item.name;
     $('mPrice').value = ''; $('mWas').value = ''; $('mSpecial').checked = false;
     manualDialog.showModal();
+  }
+  if (act === 'stash') {
+    item.stashed = !item.stashed;
+    saveItems(`${item.stashed ? 'Stash' : 'Unstash'} ${item.name}`).then(render).catch((e) => toast(e.message));
   }
   if (act === 'edit') {
     $('editName').value = item.name;
