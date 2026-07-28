@@ -358,6 +358,10 @@
       "coles": {
         "productId": "9435068",
         "url": "https://www.coles.com.au/product/obento-yaki-nori-seaweed-sushi-sheets-25g-9435068"
+      },
+      "woolworths": {
+        "productId": "185395",
+        "url": "https://www.woolworths.com.au/shop/productdetails/185395/obento-japanese-yaki-nori-for-sushi"
       }
     },
     "upcoming": null
