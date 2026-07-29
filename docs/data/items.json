@@ -365,5 +365,16 @@
       }
     },
     "upcoming": null
+  },
+  {
+    "id": "71f134a7-0bfd-4c3d-beed-fd1da0536e38",
+    "name": "Oyster Sauce",
+    "stores": {
+      "woolworths": {
+        "productId": "341297",
+        "url": "https://www.woolworths.com.au/shop/productdetails/341297/lee-kum-kee-premium-oyster-sauce"
+      }
+    },
+    "upcoming": null
   }
 ]
