@@ -135,7 +135,15 @@
     return /additional security check|hcaptcha|imperva|are you a robot|access denied|pardon our interruption/i.test(t);
   }
 
+  // True only for an explicit promo type (not "None"/blank).
+  function realPromoType(v) {
+    const s = (v == null ? '' : String(v)).trim();
+    return s && !/^(none|regular|normal|standard)$/i.test(s) ? s : '';
+  }
+
   // Recursively find the product node that carries a usable price.
+  // Returns { now, was, special, promo } — special is only true on an
+  // explicit promotion flag (a bare was>now is NOT treated as a special).
   function findColesPricing(obj, depth) {
     if (!obj || typeof obj !== 'object' || depth > 6) return null;
     const p = obj.pricing || obj.price;
@@ -143,8 +151,12 @@
       const now = p.now ?? p.value ?? p.current ?? (typeof p === 'number' ? p : null);
       if (now != null && !isNaN(Number(now))) {
         const was = p.was ?? p.wasPrice ?? null;
-        return { now: Number(now), was: was != null ? Number(was) : null,
-                 promo: p.specialType || p.promotionType || p.onPromotion };
+        const promoText =
+          p.saveStatement || p.savingStatement || p.offerDescription ||
+          p.promotionDescription || p.priceDescription || null;
+        const pt = realPromoType(p.specialType || p.promotionType);
+        const special = p.onSpecial === true || p.isOnSpecial === true || !!pt || !!promoText;
+        return { now: Number(now), was: was != null ? Number(was) : null, special, promo: promoText };
       }
     }
     for (const k of Object.keys(obj)) {
@@ -165,7 +177,7 @@
         for (const n of nodes) {
           const offer = n && n.offers && (Array.isArray(n.offers) ? n.offers[0] : n.offers);
           if (offer && offer.price != null) {
-            return { now: Number(offer.price), was: null, promo: false };
+            return { now: Number(offer.price), was: null, special: false, promo: null };
           }
         }
       } catch (e) { /* next block */ }
@@ -181,7 +193,15 @@
     const now = Number(m[1]);
     const wm = un.match(/"pricing":\{[^}]*?"was":\s*([0-9]+(?:\.[0-9]+)?)/);
     const was = wm ? Number(wm[1]) : null;
-    return { now, was, promo: was != null && was > now };
+    // explicit special signals only — a bare was>now is NOT a special
+    const seg = un.slice(m.index, m.index + 800);
+    const pm = seg.match(/"(?:saveStatement|offerDescription|promotionDescription|priceDescription)":"([^"]+)"/);
+    const promo = pm ? pm[1] : null;
+    const special =
+      /"onSpecial":\s*true/i.test(seg) ||
+      /"(?:promotionType|specialType)":"(?!None|Regular|")[^"]+"/i.test(seg) ||
+      !!promo;
+    return { now, was, special, promo };
   }
 
   async function priceColes(id) {
@@ -199,16 +219,23 @@
         const data = JSON.parse(m[1]);
         const product = data.props && data.props.pageProps && data.props.pageProps.product;
         const hit = findColesPricing(product || data.props, 0);
-        if (hit) return snap(hit.now, hit.was, hit.promo);
+        if (hit) return snap(hit.now, hit.was, hit.special, hit.promo);
       } catch (e) { /* fall through */ }
     }
     // 2) JSON-LD (server-rendered)
     const ld = priceFromJsonLd(html);
-    if (ld) return snap(ld.now, ld.was, ld.promo);
+    if (ld) return snap(ld.now, ld.was, ld.special, ld.promo);
     // 3) embedded App Router pricing payload
     const em = priceFromEmbedded(html);
-    if (em) return snap(em.now, em.was, em.promo);
+    if (em) return snap(em.now, em.was, em.special, em.promo);
     throw new Error(html.length < 20000 ? 'no price (short page — likely throttled)' : 'no price in page');
+  }
+
+  // Find a "N for $M" multibuy anywhere in the Woolworths payload.
+  function woolworthsMultibuy(j) {
+    const blob = JSON.stringify(j);
+    const m = blob.match(/(\d+)\s*for\s*\$\s*(\d+(?:\.\d+)?)/i);
+    return m ? `${m[1]} for $${m[2]}` : null;
   }
 
   async function priceWoolworths(id) {
@@ -219,18 +246,28 @@
     const j = await r.json();
     const p = j.Product || j;
     if (!p || p.Price == null) throw new Error('no price');
+    let onSpecial = !!p.IsOnSpecial;
+    let promo = null;
+    const mb = woolworthsMultibuy(j);
+    if (mb) { promo = mb; onSpecial = true; }
+    else if (Array.isArray(p.Promotions) && p.Promotions.length) {
+      promo = p.Promotions[0].Title || p.Promotions[0].Description || 'Promotion';
+      onSpecial = true;
+    }
     return {
       price: p.Price,
       wasPrice: p.WasPrice > p.Price ? p.WasPrice : null,
-      onSpecial: !!p.IsOnSpecial,
+      onSpecial,
+      promo,
     };
   }
 
-  function snap(now, was, promo) {
+  function snap(now, was, special, promo) {
     return {
       price: now,
-      wasPrice: was > now ? was : null,
-      onSpecial: !!(was > now || promo),
+      wasPrice: was && was > now ? was : null,
+      onSpecial: !!special,
+      promo: promo || null,
     };
   }
 
@@ -271,7 +308,7 @@
         const rows = (prices.data.history[it.id] || []).filter(
           (h) => !(h.date === date && h.store === store)
         );
-        rows.push({ date, store, price: s.price, wasPrice: s.wasPrice, onSpecial: s.onSpecial, manual: false });
+        rows.push({ date, store, price: s.price, wasPrice: s.wasPrice, onSpecial: s.onSpecial, promo: s.promo || null, manual: false });
         rows.sort((a, b) => (a.date < b.date ? -1 : 1));
         prices.data.history[it.id] = rows;
         n++;

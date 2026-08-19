@@ -60,6 +60,7 @@ function appendSnap(prices, itemId, store, snap, date) {
     price: snap.price,
     wasPrice: snap.wasPrice ?? null,
     onSpecial: !!snap.onSpecial,
+    promo: snap.promo ?? null,
     manual: false,
   });
   rows.sort((a, b) => (a.date < b.date ? -1 : 1));
@@ -109,10 +110,19 @@ const EXTRACT_WOOLWORTHS = async (id) => {
       const j = await r.json();
       const p = j.Product || j;
       if (p && p.Price != null) {
+        let onSpecial = !!p.IsOnSpecial;
+        let promo = null;
+        const mb = JSON.stringify(j).match(/(\d+)\s*for\s*\$\s*(\d+(?:\.\d+)?)/i);
+        if (mb) { promo = `${mb[1]} for $${mb[2]}`; onSpecial = true; }
+        else if (Array.isArray(p.Promotions) && p.Promotions.length) {
+          promo = p.Promotions[0].Title || p.Promotions[0].Description || 'Promotion';
+          onSpecial = true;
+        }
         return {
           price: p.Price,
           wasPrice: p.WasPrice > p.Price ? p.WasPrice : null,
-          onSpecial: !!p.IsOnSpecial,
+          onSpecial,
+          promo,
         };
       }
     }
