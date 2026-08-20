@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Price Tracker — Coles & Woolworths auto-capture
 // @namespace    https://github.com/phrenetic-labs/price-tracker
-// @version      1.0.0
+// @version      1.1.0
 // @description  While you browse Coles/Woolworths in your own session, quietly read prices for your tracked items and commit them to your Price Tracker repo. No bot evasion — runs as you, on your device.
 // @match        https://www.coles.com.au/*
 // @match        https://www.woolworths.com.au/*
@@ -12,6 +12,8 @@
 // @grant        GM_xmlhttpRequest
 // @grant        unsafeWindow
 // @connect      api.github.com
+// @updateURL    https://raw.githubusercontent.com/phrenetic-labs/price-tracker/main/userscript/price-tracker.user.js
+// @downloadURL  https://raw.githubusercontent.com/phrenetic-labs/price-tracker/main/userscript/price-tracker.user.js
 // ==/UserScript==
 
 /*
