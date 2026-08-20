@@ -700,9 +700,10 @@ function bmSource() {
     "let ids=null;const hm=location.hash.match(/ptsync=([^&]+)/);" +
     "if(hm){try{const d=dec(hm[1]);if(d.store===store)ids=d.ids;}catch(e){}}" +
     "const snaps=[];const done={};" +
-    "const cg=store==='coles';const gap=()=>cg?2200+Math.random()*1500:700+Math.random()*500;" +
-    "if(ids&&ids.length){let pend=[],since=0;for(const pid of ids){try{const s=await grab(pid);done[pid]=1;snaps.push({productId:String(pid),price:s.price,wasPrice:s.wasPrice,onSpecial:s.onSpecial,promo:s.promo||null});}catch(e){pend.push(pid);}await sleep(gap());if(cg&&++since>=6){since=0;await sleep(12000);}}" +
-    "if(pend.length){await sleep(cg?8000:4000);for(const pid of pend){try{const s=await grab(pid);snaps.push({productId:String(pid),price:s.price,wasPrice:s.wasPrice,onSpecial:s.onSpecial,promo:s.promo||null});}catch(e){}await sleep(gap());}}}" +
+    "const gap=()=>300+Math.random()*350;const isCh=m=>/bot-check|throttled|HTTP 403|challenge|human/i.test(m);" +
+    "if(ids&&ids.length){let pend=[];for(const pid of ids){try{const s=await grab(pid);done[pid]=1;snaps.push({productId:String(pid),price:s.price,wasPrice:s.wasPrice,onSpecial:s.onSpecial,promo:s.promo||null});}catch(e){pend.push(pid);}await sleep(gap());}" +
+    "if(pend.length&&store==='coles'){for(let i=0;i<36;i++){const pid=pend[0];try{const s=await grab(pid);snaps.push({productId:String(pid),price:s.price,wasPrice:s.wasPrice,onSpecial:s.onSpecial,promo:s.promo||null});pend.shift();break;}catch(e){if(!isCh(e.message))break;await sleep(5000);}}}" +
+    "for(const pid of pend){try{const s=await grab(pid);snaps.push({productId:String(pid),price:s.price,wasPrice:s.wasPrice,onSpecial:s.onSpecial,promo:s.promo||null});}catch(e){}await sleep(gap());}}" +
     "else{const m=location.pathname.match(store==='coles'?/-(\\d+)(?:$|[\\/?#])/:/productdetails\\/(\\d+)/);" +
     "if(!m){alert('Open a product page, or use the Sync buttons in the app.');return;}" +
     "try{const s=await grab(m[1]);snaps.push({productId:m[1],price:s.price,wasPrice:s.wasPrice,onSpecial:s.onSpecial,promo:s.promo||null});}catch(e){alert(store+': '+e.message);return;}}" +

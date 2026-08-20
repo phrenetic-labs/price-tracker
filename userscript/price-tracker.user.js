@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Price Tracker — Coles & Woolworths auto-capture
 // @namespace    https://github.com/phrenetic-labs/price-tracker
-// @version      1.1.0
+// @version      1.2.0
 // @description  While you browse Coles/Woolworths in your own session, quietly read prices for your tracked items and commit them to your Price Tracker repo. No bot evasion — runs as you, on your device.
 // @match        https://www.coles.com.au/*
 // @match        https://www.woolworths.com.au/*
@@ -328,17 +328,12 @@
       };
       const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-      // Pacing — Coles (Imperva) rate-limits after ~10 rapid hits, so go
-      // slower there and take a longer breather every few items to stay
-      // under the burst threshold. Woolworths tolerates a quicker pace.
-      const isColes = store === 'coles';
-      const gap = () => (isColes ? 2200 + Math.random() * 1500 : 700 + Math.random() * 500);
-      const BURST = 6;        // items before a longer pause
-      const BURST_PAUSE = 12000;
+      // Fast pass — Coles will likely throw a human-check after ~10 hits.
+      // When it does, we pause, ask you to solve it, and resume automatically.
+      const gap = () => 300 + Math.random() * 350;
+      const isChallenge = (msg) => /bot-check|throttled|HTTP 403|challenge|human/i.test(msg);
 
-      // First pass
       let pending = [];
-      let since = 0;
       for (const it of list) {
         try {
           record(it, await PRICER[store](it.stores[store].productId));
@@ -347,19 +342,28 @@
           console.warn('[Price Tracker]', it.name, '→', e.message);
         }
         await sleep(gap());
-        if (isColes && ++since >= BURST) {
-          since = 0;
-          toast(`Reading ${store}… ${n}/${list.length} (brief pause to avoid rate-limit)`, true);
-          await sleep(BURST_PAUSE);
-        } else {
-          toast(`Reading ${store}… ${n}/${list.length}`, true);
-        }
+        toast(`Reading ${store}… ${n}/${list.length}`, true);
       }
 
-      // Retry pass for the ones that missed (throttle blips / a solved challenge)
       const fails = [];
       if (pending.length) {
-        await sleep(isColes ? 8000 : 4000);
+        // If the misses look like a bot-check, wait for you to solve it, then resume.
+        if (pending.some((it) => true) && store === 'coles') {
+          let cleared = false;
+          for (let i = 0; i < 36 && !cleared; i++) { // poll up to ~3 min
+            const probe = pending[0];
+            try {
+              record(probe, await PRICER[store](probe.stores[store].productId));
+              pending.shift(); // that one's done
+              cleared = true;
+            } catch (e) {
+              if (!isChallenge(e.message)) { cleared = true; break; } // not a challenge — just retry normally
+              toast('⚠️ Coles wants to verify you’re human — solve the check on the page (refresh it if you don’t see it). Capture resumes automatically…', true);
+              await sleep(5000);
+            }
+          }
+        }
+        // Retry the rest quickly
         for (const it of pending) {
           try {
             record(it, await PRICER[store](it.stores[store].productId));
