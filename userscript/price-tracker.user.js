@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Price Tracker — Coles & Woolworths auto-capture
 // @namespace    https://github.com/phrenetic-labs/price-tracker
-// @version      1.2.1
+// @version      1.2.2
 // @description  While you browse Coles/Woolworths in your own session, quietly read prices for your tracked items and commit them to your Price Tracker repo. No bot evasion — runs as you, on your device.
 // @match        https://www.coles.com.au/*
 // @match        https://www.woolworths.com.au/*
@@ -33,7 +33,7 @@
 (function () {
   'use strict';
 
-  const COOLDOWN_MIN = 180; // don't auto-run more than once per store per 3h
+  const COOLDOWN_MIN = 60; // auto-run on open, but at most once per store per hour
   const store = location.hostname.includes('coles')
     ? 'coles'
     : location.hostname.includes('woolworths')
@@ -305,7 +305,13 @@
     }
     const key = `lastRun_${store}`;
     const last = GM_getValue(key, 0);
-    if (!manual && Date.now() - last < COOLDOWN_MIN * 60000) return; // throttle
+    if (!manual && Date.now() - last < COOLDOWN_MIN * 60000) {
+      // Skipped by throttle — show a brief note so it's clear it's working.
+      const mins = Math.ceil((COOLDOWN_MIN * 60000 - (Date.now() - last)) / 60000);
+      const label = store.charAt(0).toUpperCase() + store.slice(1);
+      toast(`${label} prices captured recently — auto-runs again in ~${mins} min (or tap “Capture prices now”)`);
+      return;
+    }
 
     running = true;
     try {
