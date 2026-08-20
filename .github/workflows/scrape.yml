@@ -47,11 +47,22 @@ jobs:
         run: |
           git config user.name "price-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add docs/data/prices.json
-          if git diff --cached --quiet; then
-            echo "No price changes to commit."
-          else
+
+          # Save this run's scraped output, then merge it onto the freshest
+          # remote each attempt (data-level merge => never a git text conflict).
+          cp docs/data/prices.json /tmp/ours.json
+
+          pushed=0
+          for attempt in 1 2 3 4 5; do
+            git fetch origin "$GITHUB_REF_NAME"
+            git reset --hard "origin/$GITHUB_REF_NAME"
+            node scraper/merge-prices.js docs/data/prices.json /tmp/ours.json docs/data/prices.json
+            git add docs/data/prices.json
+            if git diff --cached --quiet; then
+              echo "No price changes to commit."; pushed=1; break
+            fi
             git commit -m "Prices $(TZ=Australia/Sydney date +'%Y-%m-%d %H:%M AEST')"
-            git pull --rebase --autostash origin ${GITHUB_REF_NAME}
-            git push
-          fi
+            if git push; then pushed=1; break; fi
+            echo "Push race on attempt $attempt — retrying…"; sleep $((attempt * 3))
+          done
+          [ "$pushed" = 1 ] || { echo "Could not push after retries"; exit 1; }

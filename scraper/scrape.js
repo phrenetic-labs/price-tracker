@@ -110,14 +110,16 @@ const EXTRACT_WOOLWORTHS = async (id) => {
       const j = await r.json();
       const p = j.Product || j;
       if (p && p.Price != null) {
-        let onSpecial = !!p.IsOnSpecial;
-        let promo = null;
-        const mb = JSON.stringify(j).match(/(\d+)\s*for\s*\$\s*(\d+(?:\.\d+)?)/i);
-        if (mb) { promo = `${mb[1]} for $${mb[2]}`; onSpecial = true; }
-        else if (Array.isArray(p.Promotions) && p.Promotions.length) {
-          promo = p.Promotions[0].Title || p.Promotions[0].Description || 'Promotion';
-          onSpecial = true;
-        }
+        const fmt = (v) => (v % 1 === 0 ? String(v) : Number(v).toFixed(2));
+        const ct = p.CentreTag || {};
+        let onSpecial = false, promo = null;
+        if (ct.MultibuyData && ct.MultibuyData.Quantity) {
+          onSpecial = true; promo = `${ct.MultibuyData.Quantity} for $${fmt(ct.MultibuyData.Price)}`;
+        } else if (ct.TagContentText && /\d+\s*for\s*\$/i.test(ct.TagContentText)) {
+          onSpecial = true; promo = ct.TagContentText.trim();
+        } else if (p.IsHalfPrice) { onSpecial = true; promo = '½ Price'; }
+        else if (p.IsOnSpecial) { onSpecial = true; }
+        else if (p.IsEdrSpecial) { onSpecial = true; promo = 'Rewards special'; }
         return {
           price: p.Price,
           wasPrice: p.WasPrice > p.Price ? p.WasPrice : null,

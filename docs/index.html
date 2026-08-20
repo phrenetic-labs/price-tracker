@@ -670,32 +670,39 @@ function bmSource() {
     "const dec=s=>JSON.parse(decodeURIComponent(escape(atob(s))));" +
     "const h=location.hostname;const store=h.includes('coles')?'coles':h.includes('woolworths')?'woolworths':null;" +
     "if(!store){alert('Open Coles or Woolworths first, then tap this.');return;}" +
-    "const sleep=ms=>new Promise(z=>setTimeout(z,ms));" +
+    "const sleep=ms=>new Promise(z=>setTimeout(z,ms));const fmt=v=>v%1===0?String(v):Number(v).toFixed(2);" +
+    // JSON-LD: price + priceType special (ListPrice=regular, SalePrice=special)
     "const ldPrice=t=>{const re=/<script[^>]*type=\"application\\/ld\\+json\"[^>]*>([\\s\\S]*?)<\\/script>/gi;let m,best=null;" +
     "while((m=re.exec(t))){try{const j=JSON.parse(m[1]);const a=Array.isArray(j)?j:[j];" +
-    "for(const n of a){const o=n&&n.offers&&(Array.isArray(n.offers)?n.offers[0]:n.offers);if(o&&o.price!=null)best=Number(o.price);}}catch(e){}}return best;};" +
+    "for(const n of a){const o=n&&n.offers&&(Array.isArray(n.offers)?n.offers[0]:n.offers);if(o&&o.price!=null){" +
+    "const sp=o.priceSpecification;const pt=((Array.isArray(sp)?sp[0]:sp)||{}).priceType||'';best={price:Number(o.price),onSpecial:/saleprice/i.test(pt)};}}}catch(e){}}return best;};" +
+    // Coles embedded pricing (authoritative): special iff was>now, saveAmount, or saveStatement
     "const emb=t=>{const u=t.replace(/\\\\\"/g,'\"');const m=u.match(/\"pricing\":\\{[^}]*?\"now\":\\s*([0-9]+(?:\\.[0-9]+)?)/);" +
-    "if(!m)return null;const now=Number(m[1]);const w=u.match(/\"pricing\":\\{[^}]*?\"was\":\\s*([0-9]+(?:\\.[0-9]+)?)/);" +
-    "const was=w?Number(w[1]):null;const seg=u.slice(m.index,m.index+800);" +
-    "const pm=seg.match(/\"(?:saveStatement|offerDescription|promotionDescription|priceDescription)\":\"([^\"]+)\"/);" +
-    "const promo=pm?pm[1]:null;const special=/\"onSpecial\":\\s*true/i.test(seg)||/\"(?:promotionType|specialType)\":\"(?!None|Regular|\")[^\"]+\"/i.test(seg)||!!promo;" +
+    "if(!m)return null;const now=Number(m[1]);const seg=u.slice(m.index,m.index+500);" +
+    "const w=seg.match(/\"was\":\\s*([0-9]+(?:\\.[0-9]+)?)/);const was=w?Number(w[1]):null;" +
+    "const sa=seg.match(/\"saveAmount\":\\s*([0-9]+(?:\\.[0-9]+)?)/);const st=seg.match(/\"saveStatement\":\"([^\"]+)\"/);" +
+    "const pt=seg.match(/\"(?:promotionType|specialType)\":\"(?!None|Regular|\")([^\"]+)\"/i);" +
+    "const promo=st?st[1]:null;const special=(was!=null&&was>now)||!!sa||!!st||!!pt||/\"onSpecial\":\\s*true/i.test(seg);" +
     "return{price:now,wasPrice:was&&was>now?was:null,onSpecial:special,promo:promo};};" +
     // grab one product's price by id, same-origin
     "const grab=async pid=>{if(store==='woolworths'){const r=await fetch('/apis/ui/product/detail/'+pid+'?isMobile=false',{headers:{accept:'application/json'}});" +
     "if(!r.ok)throw new Error('HTTP '+r.status);const j=await r.json();const p=j.Product;if(!p||p.Price==null)throw new Error('no price');" +
-    "let onSpecial=!!p.IsOnSpecial,promo=null;const mb=JSON.stringify(j).match(/(\\d+)\\s*for\\s*\\$\\s*(\\d+(?:\\.\\d+)?)/i);" +
-    "if(mb){promo=mb[1]+' for $'+mb[2];onSpecial=true;}else if(Array.isArray(p.Promotions)&&p.Promotions.length){promo=p.Promotions[0].Title||p.Promotions[0].Description||'Promotion';onSpecial=true;}" +
+    "const ct=p.CentreTag||{};let onSpecial=false,promo=null;" +
+    "if(ct.MultibuyData&&ct.MultibuyData.Quantity){onSpecial=true;promo=ct.MultibuyData.Quantity+' for $'+fmt(ct.MultibuyData.Price);}" +
+    "else if(ct.TagContentText&&/\\d+\\s*for\\s*\\$/i.test(ct.TagContentText)){onSpecial=true;promo=ct.TagContentText.trim();}" +
+    "else if(p.IsHalfPrice){onSpecial=true;promo='\\u00bd Price';}else if(p.IsOnSpecial){onSpecial=true;}else if(p.IsEdrSpecial){onSpecial=true;promo='Rewards special';}" +
     "return{price:p.Price,wasPrice:p.WasPrice>p.Price?p.WasPrice:null,onSpecial:onSpecial,promo:promo};}" +
     "const r=await fetch('/product/p-'+pid,{headers:{accept:'text/html'}});if(!r.ok)throw new Error('HTTP '+r.status);const html=await r.text();" +
     "if(/additional security check|hcaptcha|imperva|pardon our interruption|access denied/i.test(html))throw new Error('bot-check (throttled)');" +
-    "const pr=ldPrice(html);if(pr!=null)return{price:pr,wasPrice:null,onSpecial:false,promo:null};" +
-    "const em=emb(html);if(em)return em;throw new Error('no price');};" +
+    "const em=emb(html);if(em)return em;" +
+    "const pr=ldPrice(html);if(pr)return{price:pr.price,wasPrice:null,onSpecial:pr.onSpecial,promo:null};throw new Error('no price');};" +
     // read sync list from hash, else current-page fallback
     "let ids=null;const hm=location.hash.match(/ptsync=([^&]+)/);" +
     "if(hm){try{const d=dec(hm[1]);if(d.store===store)ids=d.ids;}catch(e){}}" +
     "const snaps=[];const done={};" +
-    "if(ids&&ids.length){let pend=[];for(const pid of ids){try{const s=await grab(pid);done[pid]=1;snaps.push({productId:String(pid),price:s.price,wasPrice:s.wasPrice,onSpecial:s.onSpecial,promo:s.promo||null});}catch(e){pend.push(pid);}await sleep(700+Math.random()*600);}" +
-    "if(pend.length){await sleep(4000);for(const pid of pend){try{const s=await grab(pid);snaps.push({productId:String(pid),price:s.price,wasPrice:s.wasPrice,onSpecial:s.onSpecial,promo:s.promo||null});}catch(e){}await sleep(1200+Math.random()*700);}}}" +
+    "const cg=store==='coles';const gap=()=>cg?2200+Math.random()*1500:700+Math.random()*500;" +
+    "if(ids&&ids.length){let pend=[],since=0;for(const pid of ids){try{const s=await grab(pid);done[pid]=1;snaps.push({productId:String(pid),price:s.price,wasPrice:s.wasPrice,onSpecial:s.onSpecial,promo:s.promo||null});}catch(e){pend.push(pid);}await sleep(gap());if(cg&&++since>=6){since=0;await sleep(12000);}}" +
+    "if(pend.length){await sleep(cg?8000:4000);for(const pid of pend){try{const s=await grab(pid);snaps.push({productId:String(pid),price:s.price,wasPrice:s.wasPrice,onSpecial:s.onSpecial,promo:s.promo||null});}catch(e){}await sleep(gap());}}}" +
     "else{const m=location.pathname.match(store==='coles'?/-(\\d+)(?:$|[\\/?#])/:/productdetails\\/(\\d+)/);" +
     "if(!m){alert('Open a product page, or use the Sync buttons in the app.');return;}" +
     "try{const s=await grab(m[1]);snaps.push({productId:m[1],price:s.price,wasPrice:s.wasPrice,onSpecial:s.onSpecial,promo:s.promo||null});}catch(e){alert(store+': '+e.message);return;}}" +

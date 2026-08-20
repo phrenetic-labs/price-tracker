@@ -177,7 +177,10 @@
         for (const n of nodes) {
           const offer = n && n.offers && (Array.isArray(n.offers) ? n.offers[0] : n.offers);
           if (offer && offer.price != null) {
-            return { now: Number(offer.price), was: null, special: false, promo: null };
+            const spec = offer.priceSpecification;
+            const pt = ((Array.isArray(spec) ? spec[0] : spec) || {}).priceType || '';
+            // priceType "ListPrice" = regular price; "SalePrice" = on special
+            return { now: Number(offer.price), was: null, special: /saleprice/i.test(pt), promo: null };
           }
         }
       } catch (e) { /* next block */ }
@@ -186,21 +189,23 @@
   }
 
   // Pull pricing out of the App Router streamed payload embedded in the HTML.
+  // Coles pricing object looks like:
+  //   "pricing":{"now":5.8,"was":null,"saveAmount":null,"saveStatement":null,"unit":{…}}
+  // A genuine special has a numeric was>now, a saveAmount, or a saveStatement.
   function priceFromEmbedded(html) {
     const un = html.replace(/\\"/g, '"'); // un-escape RSC-escaped JSON
     const m = un.match(/"pricing":\{[^}]*?"now":\s*([0-9]+(?:\.[0-9]+)?)/);
     if (!m) return null;
     const now = Number(m[1]);
-    const wm = un.match(/"pricing":\{[^}]*?"was":\s*([0-9]+(?:\.[0-9]+)?)/);
+    const seg = un.slice(m.index, m.index + 500); // stay within the pricing object
+    const wm = seg.match(/"was":\s*([0-9]+(?:\.[0-9]+)?)/);       // null won't match a number
     const was = wm ? Number(wm[1]) : null;
-    // explicit special signals only — a bare was>now is NOT a special
-    const seg = un.slice(m.index, m.index + 800);
-    const pm = seg.match(/"(?:saveStatement|offerDescription|promotionDescription|priceDescription)":"([^"]+)"/);
-    const promo = pm ? pm[1] : null;
-    const special =
-      /"onSpecial":\s*true/i.test(seg) ||
-      /"(?:promotionType|specialType)":"(?!None|Regular|")[^"]+"/i.test(seg) ||
-      !!promo;
+    const saveM = seg.match(/"saveAmount":\s*([0-9]+(?:\.[0-9]+)?)/);
+    const stmtM = seg.match(/"saveStatement":"([^"]+)"/);
+    const promoM = seg.match(/"(?:promotionType|specialType)":"(?!None|Regular|")([^"]+)"/i);
+    const promo = stmtM ? stmtM[1] : null;
+    const special = (was != null && was > now) || !!saveM || !!stmtM || !!promoM ||
+      /"onSpecial":\s*true/i.test(seg);
     return { now, was, special, promo };
   }
 
@@ -222,20 +227,33 @@
         if (hit) return snap(hit.now, hit.was, hit.special, hit.promo);
       } catch (e) { /* fall through */ }
     }
-    // 2) JSON-LD (server-rendered)
-    const ld = priceFromJsonLd(html);
-    if (ld) return snap(ld.now, ld.was, ld.special, ld.promo);
-    // 3) embedded App Router pricing payload
+    // 2) embedded App Router pricing (authoritative special fields)
     const em = priceFromEmbedded(html);
     if (em) return snap(em.now, em.was, em.special, em.promo);
+    // 3) JSON-LD (price + priceType-based special)
+    const ld = priceFromJsonLd(html);
+    if (ld) return snap(ld.now, ld.was, ld.special, ld.promo);
     throw new Error(html.length < 20000 ? 'no price (short page — likely throttled)' : 'no price in page');
   }
 
-  // Find a "N for $M" multibuy anywhere in the Woolworths payload.
-  function woolworthsMultibuy(j) {
-    const blob = JSON.stringify(j);
-    const m = blob.match(/(\d+)\s*for\s*\$\s*(\d+(?:\.\d+)?)/i);
-    return m ? `${m[1]} for $${m[2]}` : null;
+  const fmtMoney = (v) => (v % 1 === 0 ? String(v) : Number(v).toFixed(2));
+
+  // Woolworths promotion detection. Multibuy lives in a structured field:
+  //   CentreTag.MultibuyData = { Quantity: 2, Price: 6 }  ("2 for $6")
+  // plus flags IsOnSpecial / IsHalfPrice / IsEdrSpecial.
+  function woolworthsPromo(p) {
+    const ct = p.CentreTag || {};
+    if (ct.MultibuyData && ct.MultibuyData.Quantity) {
+      const md = ct.MultibuyData;
+      return { special: true, promo: `${md.Quantity} for $${fmtMoney(md.Price)}` };
+    }
+    if (ct.TagContentText && /\d+\s*for\s*\$/i.test(ct.TagContentText)) {
+      return { special: true, promo: ct.TagContentText.trim() };
+    }
+    if (p.IsHalfPrice) return { special: true, promo: '½ Price' };
+    if (p.IsOnSpecial) return { special: true, promo: null };
+    if (p.IsEdrSpecial) return { special: true, promo: 'Rewards special' };
+    return { special: false, promo: null };
   }
 
   async function priceWoolworths(id) {
@@ -246,19 +264,12 @@
     const j = await r.json();
     const p = j.Product || j;
     if (!p || p.Price == null) throw new Error('no price');
-    let onSpecial = !!p.IsOnSpecial;
-    let promo = null;
-    const mb = woolworthsMultibuy(j);
-    if (mb) { promo = mb; onSpecial = true; }
-    else if (Array.isArray(p.Promotions) && p.Promotions.length) {
-      promo = p.Promotions[0].Title || p.Promotions[0].Description || 'Promotion';
-      onSpecial = true;
-    }
+    const pr = woolworthsPromo(p);
     return {
       price: p.Price,
       wasPrice: p.WasPrice > p.Price ? p.WasPrice : null,
-      onSpecial,
-      promo,
+      onSpecial: pr.special,
+      promo: pr.promo,
     };
   }
 
@@ -315,8 +326,17 @@
       };
       const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-      // First pass — gentle pacing to avoid tripping bot protection
+      // Pacing — Coles (Imperva) rate-limits after ~10 rapid hits, so go
+      // slower there and take a longer breather every few items to stay
+      // under the burst threshold. Woolworths tolerates a quicker pace.
+      const isColes = store === 'coles';
+      const gap = () => (isColes ? 2200 + Math.random() * 1500 : 700 + Math.random() * 500);
+      const BURST = 6;        // items before a longer pause
+      const BURST_PAUSE = 12000;
+
+      // First pass
       let pending = [];
+      let since = 0;
       for (const it of list) {
         try {
           record(it, await PRICER[store](it.stores[store].productId));
@@ -324,21 +344,27 @@
           pending.push(it);
           console.warn('[Price Tracker]', it.name, '→', e.message);
         }
-        await sleep(900 + Math.random() * 700);
-        toast(`Reading ${store}… ${n}/${list.length}`, true);
+        await sleep(gap());
+        if (isColes && ++since >= BURST) {
+          since = 0;
+          toast(`Reading ${store}… ${n}/${list.length} (brief pause to avoid rate-limit)`, true);
+          await sleep(BURST_PAUSE);
+        } else {
+          toast(`Reading ${store}… ${n}/${list.length}`, true);
+        }
       }
 
-      // Retry pass for the ones that missed (usually throttle blips)
+      // Retry pass for the ones that missed (throttle blips / a solved challenge)
       const fails = [];
       if (pending.length) {
-        await sleep(4000);
+        await sleep(isColes ? 8000 : 4000);
         for (const it of pending) {
           try {
             record(it, await PRICER[store](it.stores[store].productId));
           } catch (e) {
             fails.push(`${it.name}: ${e.message}`);
           }
-          await sleep(1400 + Math.random() * 800);
+          await sleep(gap());
         }
       }
       if (n) {
