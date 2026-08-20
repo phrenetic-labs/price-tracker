@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Price Tracker — Coles & Woolworths auto-capture
 // @namespace    https://github.com/phrenetic-labs/price-tracker
-// @version      1.2.0
+// @version      1.2.1
 // @description  While you browse Coles/Woolworths in your own session, quietly read prices for your tracked items and commit them to your Price Tracker repo. No bot evasion — runs as you, on your device.
 // @match        https://www.coles.com.au/*
 // @match        https://www.woolworths.com.au/*
@@ -199,15 +199,20 @@
     const m = un.match(/"pricing":\{[^}]*?"now":\s*([0-9]+(?:\.[0-9]+)?)/);
     if (!m) return null;
     const now = Number(m[1]);
-    const seg = un.slice(m.index, m.index + 500); // stay within the pricing object
+    // Scope tightly to the pricing object's own scalar fields. They all precede
+    // the nested "unit"; a wider window spills into neighbouring JSON and can
+    // pick up an unrelated onSpecial/promotionType (false positive).
+    const start = m.index;
+    const unitIdx = un.indexOf('"unit"', start);
+    const end = unitIdx > start && unitIdx < start + 400 ? unitIdx : start + 220;
+    const seg = un.slice(start, end);
     const wm = seg.match(/"was":\s*([0-9]+(?:\.[0-9]+)?)/);       // null won't match a number
     const was = wm ? Number(wm[1]) : null;
     const saveM = seg.match(/"saveAmount":\s*([0-9]+(?:\.[0-9]+)?)/);
     const stmtM = seg.match(/"saveStatement":"([^"]+)"/);
-    const promoM = seg.match(/"(?:promotionType|specialType)":"(?!None|Regular|")([^"]+)"/i);
     const promo = stmtM ? stmtM[1] : null;
-    const special = (was != null && was > now) || !!saveM || !!stmtM || !!promoM ||
-      /"onSpecial":\s*true/i.test(seg);
+    // Only these three authoritative signals count as a special.
+    const special = (was != null && was > now) || !!saveM || !!stmtM;
     return { now, was, special, promo };
   }
 

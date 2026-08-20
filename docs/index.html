@@ -678,11 +678,11 @@ function bmSource() {
     "const sp=o.priceSpecification;const pt=((Array.isArray(sp)?sp[0]:sp)||{}).priceType||'';best={price:Number(o.price),onSpecial:/saleprice/i.test(pt)};}}}catch(e){}}return best;};" +
     // Coles embedded pricing (authoritative): special iff was>now, saveAmount, or saveStatement
     "const emb=t=>{const u=t.replace(/\\\\\"/g,'\"');const m=u.match(/\"pricing\":\\{[^}]*?\"now\":\\s*([0-9]+(?:\\.[0-9]+)?)/);" +
-    "if(!m)return null;const now=Number(m[1]);const seg=u.slice(m.index,m.index+500);" +
+    "if(!m)return null;const now=Number(m[1]);const st0=m.index;const ui=u.indexOf('\"unit\"',st0);" +
+    "const en=ui>st0&&ui<st0+400?ui:st0+220;const seg=u.slice(st0,en);" +
     "const w=seg.match(/\"was\":\\s*([0-9]+(?:\\.[0-9]+)?)/);const was=w?Number(w[1]):null;" +
     "const sa=seg.match(/\"saveAmount\":\\s*([0-9]+(?:\\.[0-9]+)?)/);const st=seg.match(/\"saveStatement\":\"([^\"]+)\"/);" +
-    "const pt=seg.match(/\"(?:promotionType|specialType)\":\"(?!None|Regular|\")([^\"]+)\"/i);" +
-    "const promo=st?st[1]:null;const special=(was!=null&&was>now)||!!sa||!!st||!!pt||/\"onSpecial\":\\s*true/i.test(seg);" +
+    "const promo=st?st[1]:null;const special=(was!=null&&was>now)||!!sa||!!st;" +
     "return{price:now,wasPrice:was&&was>now?was:null,onSpecial:special,promo:promo};};" +
     // grab one product's price by id, same-origin
     "const grab=async pid=>{if(store==='woolworths'){const r=await fetch('/apis/ui/product/detail/'+pid+'?isMobile=false',{headers:{accept:'application/json'}});" +
