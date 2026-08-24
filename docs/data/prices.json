@@ -5194,42 +5194,6 @@
         "manual": false
       }
     ],
-    "81b5d12c-2b9e-4977-9a5f-f125f7e5c336": [
-      {
-        "date": "2026-08-14",
-        "store": "coles",
-        "price": 22.5,
-        "wasPrice": null,
-        "onSpecial": false,
-        "manual": false
-      },
-      {
-        "date": "2026-08-19",
-        "store": "coles",
-        "price": 20,
-        "wasPrice": 22.5,
-        "onSpecial": true,
-        "manual": false
-      },
-      {
-        "date": "2026-08-20",
-        "store": "coles",
-        "price": 20,
-        "wasPrice": 22.5,
-        "onSpecial": true,
-        "promo": "save $2.50",
-        "manual": false
-      },
-      {
-        "date": "2026-08-24",
-        "store": "coles",
-        "price": 20,
-        "wasPrice": 22.5,
-        "onSpecial": true,
-        "promo": "save $2.50",
-        "manual": false
-      }
-    ],
     "d6972fe7-940f-46ed-806d-6139d9e3fd14": [
       {
         "date": "2026-08-24",
