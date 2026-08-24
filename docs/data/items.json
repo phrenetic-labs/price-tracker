@@ -378,17 +378,6 @@
     "upcoming": null
   },
   {
-    "id": "81b5d12c-2b9e-4977-9a5f-f125f7e5c336",
-    "name": "Harris Smokehouse Salmon",
-    "stores": {
-      "coles": {
-        "productId": "1935839",
-        "url": "https://www.coles.com.au/product/harris-smokehouse-wild-sockeye-salmon-skin-on-300g-1935839"
-      }
-    },
-    "upcoming": null
-  },
-  {
     "id": "d6972fe7-940f-46ed-806d-6139d9e3fd14",
     "name": "Spidey Toothbrush",
     "stores": {
