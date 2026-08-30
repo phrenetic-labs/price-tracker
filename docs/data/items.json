@@ -388,5 +388,20 @@
       }
     },
     "upcoming": null
+  },
+  {
+    "id": "066ccc4f-76b4-4478-a8b9-61e84e0df66e",
+    "name": "Nescafe Gold",
+    "stores": {
+      "coles": {
+        "productId": "8049750",
+        "url": "https://www.coles.com.au/product/nescafe-gold-original-premium-instant-coffee-100g-8049750"
+      },
+      "woolworths": {
+        "productId": "687035",
+        "url": "https://www.woolworths.com.au/shop/productdetails/687035/nescafe-gold-original-soluble-instant-coffee-jar"
+      }
+    },
+    "upcoming": null
   }
 ]
