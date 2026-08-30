@@ -403,5 +403,20 @@
       }
     },
     "upcoming": null
+  },
+  {
+    "id": "22f5447f-f5b3-45fc-a47c-807413a3385d",
+    "name": "Fehlbergs Pickles",
+    "stores": {
+      "coles": {
+        "productId": "3588237",
+        "url": "https://www.coles.com.au/product/fehlbergs-burger-pickles-490g-3588237"
+      },
+      "woolworths": {
+        "productId": "9228",
+        "url": "https://www.woolworths.com.au/shop/productdetails/9228/fehlbergs-burger-pickles"
+      }
+    },
+    "upcoming": null
   }
 ]
