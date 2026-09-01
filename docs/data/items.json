@@ -418,5 +418,16 @@
       }
     },
     "upcoming": null
+  },
+  {
+    "id": "b03f35cf-a5dc-4ace-8ad0-8a4bcdc1587a",
+    "name": "Turkey",
+    "stores": {
+      "woolworths": {
+        "productId": "210537",
+        "url": "https://www.woolworths.com.au/shop/productdetails/210537/ingham-s-classic-turkey-breast-oven-roasted"
+      }
+    },
+    "upcoming": null
   }
 ]
