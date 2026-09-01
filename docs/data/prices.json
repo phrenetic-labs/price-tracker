@@ -1,5 +1,5 @@
 {
-  "lastRefresh": "2026-08-31T15:05:38.787Z",
+  "lastRefresh": "2026-09-01T11:20:45.282Z",
   "history": {
     "c1c7c796-467c-4e22-89c6-3f97d794fa6c": [
       {
@@ -1752,7 +1752,7 @@
         "store": "woolworths",
         "price": 16.1,
         "wasPrice": 23,
-        "onSpecial": false,
+        "onSpecial": true,
         "promo": null,
         "manual": false
       }
@@ -6339,6 +6339,17 @@
         "price": 4.1,
         "wasPrice": null,
         "onSpecial": false,
+        "promo": null,
+        "manual": false
+      }
+    ],
+    "b03f35cf-a5dc-4ace-8ad0-8a4bcdc1587a": [
+      {
+        "date": "2026-09-01",
+        "store": "woolworths",
+        "price": 24,
+        "wasPrice": 25,
+        "onSpecial": true,
         "promo": null,
         "manual": false
       }
