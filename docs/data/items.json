@@ -429,5 +429,20 @@
       }
     },
     "upcoming": null
+  },
+  {
+    "id": "384be947-eb09-497c-822c-451d289171d4",
+    "name": "Tartare Sauce",
+    "stores": {
+      "coles": {
+        "productId": "3322310",
+        "url": "https://www.coles.com.au/product/birch-and-waite-seafood-sauce-rich-tartare-250ml-3322310"
+      },
+      "woolworths": {
+        "productId": "841749",
+        "url": "https://www.woolworths.com.au/shop/productdetails/841749/birch-waite-rich-tartare-seafood-sauce"
+      }
+    },
+    "upcoming": null
   }
 ]
