@@ -444,5 +444,16 @@
       }
     },
     "upcoming": null
+  },
+  {
+    "id": "ff4ddbc9-f66c-45d2-911a-4e8be572634d",
+    "name": "Colemans Mustard",
+    "stores": {
+      "woolworths": {
+        "productId": "88972",
+        "url": "https://www.woolworths.com.au/shop/productdetails/88972/colman-s-ingredients-english-mustard"
+      }
+    },
+    "upcoming": null
   }
 ]
