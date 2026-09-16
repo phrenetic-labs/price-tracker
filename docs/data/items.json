@@ -466,5 +466,16 @@
       }
     },
     "upcoming": null
+  },
+  {
+    "id": "bac5eee4-ac8d-4564-8191-bee38383ccf6",
+    "name": "Sherry Vinegar",
+    "stores": {
+      "woolworths": {
+        "productId": "636072",
+        "url": "https://www.woolworths.com.au/shop/productdetails/636072/moro-sherry-vinegar"
+      }
+    },
+    "upcoming": null
   }
 ]
