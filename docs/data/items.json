@@ -455,5 +455,16 @@
       }
     },
     "upcoming": null
+  },
+  {
+    "id": "949f4d2d-f527-4d58-8c8f-4465a78b4017",
+    "name": "Gloves",
+    "stores": {
+      "woolworths": {
+        "productId": "6057353",
+        "url": "https://www.woolworths.com.au/shop/productdetails/6057353/hygiene-plus-tough-task-nitrile-latex-powder-free-gloves-extra-large"
+      }
+    },
+    "upcoming": null
   }
 ]
