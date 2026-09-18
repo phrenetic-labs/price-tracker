@@ -588,5 +588,16 @@
       }
     },
     "upcoming": null
+  },
+  {
+    "id": "f21795d2-1d60-41ab-a96f-d187e312b7a4",
+    "name": "Jack Daniels Sausages",
+    "stores": {
+      "coles": {
+        "productId": "2001999",
+        "url": "https://www.coles.com.au/product/jack-daniels-texas-smokehouse-sausages-300g-2001999"
+      }
+    },
+    "upcoming": null
   }
 ]
