@@ -492,5 +492,16 @@
       }
     },
     "upcoming": null
+  },
+  {
+    "id": "afdd2d75-42b6-42f5-a193-de2e376d3d30",
+    "name": "Kraft Cheddar",
+    "stores": {
+      "woolworths": {
+        "productId": "48115",
+        "url": "https://www.woolworths.com.au/shop/productdetails/48115/kraft-cheddar-sandwich-slices-slices-12pk"
+      }
+    },
+    "upcoming": null
   }
 ]
