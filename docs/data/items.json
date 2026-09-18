@@ -503,5 +503,16 @@
       }
     },
     "upcoming": null
+  },
+  {
+    "id": "5c80dc2f-f9ab-4235-b0d1-7d2636c507fc",
+    "name": "Bega Cheddar",
+    "stores": {
+      "coles": {
+        "productId": "8792999",
+        "url": "https://www.coles.com.au/product/bega-cheese-cheddar-slices-250g-8792999"
+      }
+    },
+    "upcoming": null
   }
 ]
