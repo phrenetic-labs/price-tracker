@@ -573,5 +573,16 @@
       }
     },
     "upcoming": null
+  },
+  {
+    "id": "0bfd050b-172a-4f3e-b516-c19c566d12cc",
+    "name": "Milk Buns",
+    "stores": {
+      "woolworths": {
+        "productId": "140173",
+        "url": "https://www.woolworths.com.au/shop/productdetails/140173/woolworths-soft-glazed-milk-buns"
+      }
+    },
+    "upcoming": null
   }
 ]
