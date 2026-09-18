@@ -477,5 +477,20 @@
       }
     },
     "upcoming": null
+  },
+  {
+    "id": "4c5986d0-8cd1-4900-b0e7-12f76021aecf",
+    "name": "Garbage Bags",
+    "stores": {
+      "coles": {
+        "productId": "3779520",
+        "url": "https://www.coles.com.au/product/glad-to-be-green-recycled-kitchen-tidy-bags-large-22-pack-3779520"
+      },
+      "woolworths": {
+        "productId": "97110",
+        "url": "https://www.woolworths.com.au/shop/productdetails/97110/glad-95-recycled-kitchen-tidy-bags-large"
+      }
+    },
+    "upcoming": null
   }
 ]
