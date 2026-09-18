@@ -449,6 +449,10 @@
     "id": "ff4ddbc9-f66c-45d2-911a-4e8be572634d",
     "name": "Colmans Mustard",
     "stores": {
+      "coles": {
+        "productId": "6921434",
+        "url": "https://www.coles.com.au/product/colman's-old-english-mustard-100g-6921434"
+      },
       "woolworths": {
         "productId": "88972",
         "url": "https://www.woolworths.com.au/shop/productdetails/88972/colman-s-ingredients-english-mustard"
