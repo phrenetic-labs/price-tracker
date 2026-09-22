@@ -10872,53 +10872,6 @@
         "manual": false
       }
     ],
-    "eee16e24-b15a-4dd9-815c-b6aba5c81a17": [
-      {
-        "date": "2026-09-18",
-        "store": "woolworths",
-        "price": 14.5,
-        "wasPrice": null,
-        "onSpecial": false,
-        "promo": null,
-        "manual": false
-      },
-      {
-        "date": "2026-09-19",
-        "store": "coles",
-        "price": 14.5,
-        "wasPrice": null,
-        "onSpecial": false,
-        "promo": null,
-        "manual": false
-      },
-      {
-        "date": "2026-09-21",
-        "store": "woolworths",
-        "price": 14.5,
-        "wasPrice": null,
-        "onSpecial": false,
-        "promo": null,
-        "manual": false
-      },
-      {
-        "date": "2026-09-23",
-        "store": "coles",
-        "price": 14.5,
-        "wasPrice": null,
-        "onSpecial": false,
-        "promo": null,
-        "manual": false
-      },
-      {
-        "date": "2026-09-23",
-        "store": "woolworths",
-        "price": 7.25,
-        "wasPrice": 14.5,
-        "onSpecial": true,
-        "promo": "½ Price",
-        "manual": false
-      }
-    ],
     "0bfd050b-172a-4f3e-b516-c19c566d12cc": [
       {
         "date": "2026-09-18",
