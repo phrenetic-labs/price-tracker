@@ -1,5 +1,5 @@
 {
-  "lastRefresh": "2026-09-30T01:18:38.834Z",
+  "lastRefresh": "2026-10-05T15:56:44.700Z",
   "history": {
     "c1c7c796-467c-4e22-89c6-3f97d794fa6c": [
       {
@@ -487,6 +487,15 @@
       },
       {
         "date": "2026-09-30",
+        "store": "woolworths",
+        "price": 4,
+        "wasPrice": null,
+        "onSpecial": false,
+        "promo": null,
+        "manual": false
+      },
+      {
+        "date": "2026-10-06",
         "store": "woolworths",
         "price": 4,
         "wasPrice": null,
@@ -987,6 +996,15 @@
         "onSpecial": true,
         "promo": null,
         "manual": false
+      },
+      {
+        "date": "2026-10-06",
+        "store": "woolworths",
+        "price": 5.5,
+        "wasPrice": 7.45,
+        "onSpecial": true,
+        "promo": null,
+        "manual": false
       }
     ],
     "510adcd6-cd45-476a-9e51-8b5cf3055415": [
@@ -1443,6 +1461,15 @@
       },
       {
         "date": "2026-09-30",
+        "store": "woolworths",
+        "price": 5.8,
+        "wasPrice": null,
+        "onSpecial": false,
+        "promo": null,
+        "manual": false
+      },
+      {
+        "date": "2026-10-06",
         "store": "woolworths",
         "price": 5.8,
         "wasPrice": null,
@@ -1911,6 +1938,15 @@
         "onSpecial": false,
         "promo": null,
         "manual": false
+      },
+      {
+        "date": "2026-10-06",
+        "store": "woolworths",
+        "price": 5.8,
+        "wasPrice": null,
+        "onSpecial": false,
+        "promo": null,
+        "manual": false
       }
     ],
     "11c8c897-c2d6-46eb-8deb-c5cbb8143421": [
@@ -2367,6 +2403,15 @@
       },
       {
         "date": "2026-09-30",
+        "store": "woolworths",
+        "price": 2.3,
+        "wasPrice": null,
+        "onSpecial": false,
+        "promo": null,
+        "manual": false
+      },
+      {
+        "date": "2026-10-06",
         "store": "woolworths",
         "price": 2.3,
         "wasPrice": null,
@@ -2835,6 +2880,15 @@
         "onSpecial": false,
         "promo": null,
         "manual": false
+      },
+      {
+        "date": "2026-10-06",
+        "store": "woolworths",
+        "price": 23,
+        "wasPrice": null,
+        "onSpecial": false,
+        "promo": null,
+        "manual": false
       }
     ],
     "a291449b-00fa-4115-bb58-bab083b1d63a": [
@@ -3291,6 +3345,15 @@
       },
       {
         "date": "2026-09-30",
+        "store": "woolworths",
+        "price": 8.5,
+        "wasPrice": 17,
+        "onSpecial": true,
+        "promo": "½ Price",
+        "manual": false
+      },
+      {
+        "date": "2026-10-06",
         "store": "woolworths",
         "price": 8.5,
         "wasPrice": 17,
@@ -3759,6 +3822,15 @@
         "onSpecial": true,
         "promo": null,
         "manual": false
+      },
+      {
+        "date": "2026-10-06",
+        "store": "woolworths",
+        "price": 1.5,
+        "wasPrice": 2.2,
+        "onSpecial": true,
+        "promo": null,
+        "manual": false
       }
     ],
     "440e8ba7-5353-4d7f-b0aa-8c1af89ad09f": [
@@ -4034,6 +4106,15 @@
         "onSpecial": false,
         "promo": null,
         "manual": false
+      },
+      {
+        "date": "2026-10-06",
+        "store": "woolworths",
+        "price": 0,
+        "wasPrice": null,
+        "onSpecial": false,
+        "promo": null,
+        "manual": false
       }
     ],
     "fa2ddfd1-9dde-4175-993f-78aef8024a28": [
@@ -4303,6 +4384,15 @@
       },
       {
         "date": "2026-09-30",
+        "store": "woolworths",
+        "price": 13,
+        "wasPrice": null,
+        "onSpecial": false,
+        "promo": null,
+        "manual": false
+      },
+      {
+        "date": "2026-10-06",
         "store": "woolworths",
         "price": 13,
         "wasPrice": null,
@@ -4755,6 +4845,15 @@
         "onSpecial": true,
         "promo": null,
         "manual": false
+      },
+      {
+        "date": "2026-10-06",
+        "store": "woolworths",
+        "price": 3.5,
+        "wasPrice": 4,
+        "onSpecial": true,
+        "promo": null,
+        "manual": false
       }
     ],
     "43b8e379-5a3e-443d-a7cd-d24cda7c9432": [
@@ -5195,6 +5294,15 @@
       },
       {
         "date": "2026-09-30",
+        "store": "woolworths",
+        "price": 11,
+        "wasPrice": null,
+        "onSpecial": false,
+        "promo": null,
+        "manual": false
+      },
+      {
+        "date": "2026-10-06",
         "store": "woolworths",
         "price": 11,
         "wasPrice": null,
@@ -5647,6 +5755,15 @@
         "onSpecial": false,
         "promo": null,
         "manual": false
+      },
+      {
+        "date": "2026-10-06",
+        "store": "woolworths",
+        "price": 13,
+        "wasPrice": null,
+        "onSpecial": false,
+        "promo": null,
+        "manual": false
       }
     ],
     "8fadc588-92c1-43ab-b85c-9215e91f8dc8": [
@@ -6087,6 +6204,15 @@
       },
       {
         "date": "2026-09-30",
+        "store": "woolworths",
+        "price": 5.35,
+        "wasPrice": null,
+        "onSpecial": false,
+        "promo": null,
+        "manual": false
+      },
+      {
+        "date": "2026-10-06",
         "store": "woolworths",
         "price": 5.35,
         "wasPrice": null,
@@ -6539,6 +6665,15 @@
         "onSpecial": false,
         "promo": null,
         "manual": false
+      },
+      {
+        "date": "2026-10-06",
+        "store": "woolworths",
+        "price": 4,
+        "wasPrice": null,
+        "onSpecial": false,
+        "promo": null,
+        "manual": false
       }
     ],
     "064f0333-9652-4bff-be75-0d6a3561bc82": [
@@ -6979,6 +7114,15 @@
       },
       {
         "date": "2026-09-30",
+        "store": "woolworths",
+        "price": 5.05,
+        "wasPrice": null,
+        "onSpecial": false,
+        "promo": null,
+        "manual": false
+      },
+      {
+        "date": "2026-10-06",
         "store": "woolworths",
         "price": 5.05,
         "wasPrice": null,
@@ -7431,6 +7575,15 @@
         "onSpecial": true,
         "promo": null,
         "manual": false
+      },
+      {
+        "date": "2026-10-06",
+        "store": "woolworths",
+        "price": 4.5,
+        "wasPrice": 5.7,
+        "onSpecial": true,
+        "promo": null,
+        "manual": false
       }
     ],
     "f212887a-4095-4484-8cdd-b1b26d661bee": [
@@ -7871,6 +8024,15 @@
       },
       {
         "date": "2026-09-30",
+        "store": "woolworths",
+        "price": 10,
+        "wasPrice": null,
+        "onSpecial": false,
+        "promo": null,
+        "manual": false
+      },
+      {
+        "date": "2026-10-06",
         "store": "woolworths",
         "price": 10,
         "wasPrice": null,
@@ -8323,6 +8485,15 @@
         "onSpecial": false,
         "promo": null,
         "manual": false
+      },
+      {
+        "date": "2026-10-06",
+        "store": "woolworths",
+        "price": 11,
+        "wasPrice": null,
+        "onSpecial": false,
+        "promo": null,
+        "manual": false
       }
     ],
     "0587aed5-aef4-4090-addc-cb7b5196fac2": [
@@ -8755,6 +8926,15 @@
       },
       {
         "date": "2026-09-30",
+        "store": "woolworths",
+        "price": 3.2,
+        "wasPrice": 6.5,
+        "onSpecial": true,
+        "promo": "½ Price",
+        "manual": false
+      },
+      {
+        "date": "2026-10-06",
         "store": "woolworths",
         "price": 3.2,
         "wasPrice": 6.5,
@@ -9372,6 +9552,15 @@
         "onSpecial": true,
         "promo": null,
         "manual": false
+      },
+      {
+        "date": "2026-10-06",
+        "store": "woolworths",
+        "price": 3.6,
+        "wasPrice": 4.5,
+        "onSpecial": true,
+        "promo": null,
+        "manual": false
       }
     ],
     "8f57aa3f-75fb-43f3-8016-1b67383f6abf": [
@@ -9633,6 +9822,15 @@
       },
       {
         "date": "2026-09-30",
+        "store": "woolworths",
+        "price": 10.9,
+        "wasPrice": 14.9,
+        "onSpecial": true,
+        "promo": null,
+        "manual": false
+      },
+      {
+        "date": "2026-10-06",
         "store": "woolworths",
         "price": 10.9,
         "wasPrice": 14.9,
@@ -9995,6 +10193,15 @@
         "onSpecial": false,
         "promo": null,
         "manual": false
+      },
+      {
+        "date": "2026-10-06",
+        "store": "woolworths",
+        "price": 7,
+        "wasPrice": null,
+        "onSpecial": false,
+        "promo": null,
+        "manual": false
       }
     ],
     "71cdfdd2-1e7d-43be-8ed6-7dca3bca0b88": [
@@ -10345,6 +10552,15 @@
         "onSpecial": false,
         "promo": null,
         "manual": false
+      },
+      {
+        "date": "2026-10-06",
+        "store": "woolworths",
+        "price": 4,
+        "wasPrice": null,
+        "onSpecial": false,
+        "promo": null,
+        "manual": false
       }
     ],
     "71f134a7-0bfd-4c3d-beed-fd1da0536e38": [
@@ -10550,6 +10766,15 @@
       },
       {
         "date": "2026-09-30",
+        "store": "woolworths",
+        "price": 6,
+        "wasPrice": null,
+        "onSpecial": false,
+        "promo": null,
+        "manual": false
+      },
+      {
+        "date": "2026-10-06",
         "store": "woolworths",
         "price": 6,
         "wasPrice": null,
@@ -10857,6 +11082,15 @@
         "onSpecial": false,
         "promo": null,
         "manual": false
+      },
+      {
+        "date": "2026-10-06",
+        "store": "woolworths",
+        "price": 14.5,
+        "wasPrice": null,
+        "onSpecial": false,
+        "promo": null,
+        "manual": false
       }
     ],
     "22f5447f-f5b3-45fc-a47c-807413a3385d": [
@@ -11066,6 +11300,15 @@
         "onSpecial": false,
         "promo": null,
         "manual": false
+      },
+      {
+        "date": "2026-10-06",
+        "store": "woolworths",
+        "price": 4,
+        "wasPrice": null,
+        "onSpecial": false,
+        "promo": null,
+        "manual": false
       }
     ],
     "b03f35cf-a5dc-4ace-8ad0-8a4bcdc1587a": [
@@ -11188,6 +11431,15 @@
       },
       {
         "date": "2026-09-30",
+        "store": "woolworths",
+        "price": 24,
+        "wasPrice": 25,
+        "onSpecial": true,
+        "promo": null,
+        "manual": false
+      },
+      {
+        "date": "2026-10-06",
         "store": "woolworths",
         "price": 24,
         "wasPrice": 25,
@@ -11331,6 +11583,15 @@
         "onSpecial": true,
         "promo": null,
         "manual": false
+      },
+      {
+        "date": "2026-10-06",
+        "store": "woolworths",
+        "price": 4.75,
+        "wasPrice": 5.5,
+        "onSpecial": true,
+        "promo": null,
+        "manual": false
       }
     ],
     "ff4ddbc9-f66c-45d2-911a-4e8be572634d": [
@@ -11405,6 +11666,15 @@
         "onSpecial": false,
         "promo": null,
         "manual": false
+      },
+      {
+        "date": "2026-10-06",
+        "store": "woolworths",
+        "price": 5,
+        "wasPrice": null,
+        "onSpecial": false,
+        "promo": null,
+        "manual": false
       }
     ],
     "949f4d2d-f527-4d58-8c8f-4465a78b4017": [
@@ -11461,6 +11731,15 @@
         "onSpecial": false,
         "promo": null,
         "manual": false
+      },
+      {
+        "date": "2026-10-06",
+        "store": "woolworths",
+        "price": 17,
+        "wasPrice": null,
+        "onSpecial": false,
+        "promo": null,
+        "manual": false
       }
     ],
     "bac5eee4-ac8d-4564-8191-bee38383ccf6": [
@@ -11511,6 +11790,15 @@
       },
       {
         "date": "2026-09-30",
+        "store": "woolworths",
+        "price": 5,
+        "wasPrice": 5.5,
+        "onSpecial": true,
+        "promo": null,
+        "manual": false
+      },
+      {
+        "date": "2026-10-06",
         "store": "woolworths",
         "price": 5,
         "wasPrice": 5.5,
@@ -11591,6 +11879,15 @@
         "onSpecial": false,
         "promo": null,
         "manual": false
+      },
+      {
+        "date": "2026-10-06",
+        "store": "woolworths",
+        "price": 4.75,
+        "wasPrice": null,
+        "onSpecial": false,
+        "promo": null,
+        "manual": false
       }
     ],
     "afdd2d75-42b6-42f5-a193-de2e376d3d30": [
@@ -11632,6 +11929,15 @@
       },
       {
         "date": "2026-09-30",
+        "store": "woolworths",
+        "price": 5.7,
+        "wasPrice": null,
+        "onSpecial": false,
+        "promo": null,
+        "manual": false
+      },
+      {
+        "date": "2026-10-06",
         "store": "woolworths",
         "price": 5.7,
         "wasPrice": null,
@@ -11685,6 +11991,15 @@
         "onSpecial": false,
         "promo": null,
         "manual": false
+      },
+      {
+        "date": "2026-10-06",
+        "store": "woolworths",
+        "price": 10.5,
+        "wasPrice": null,
+        "onSpecial": false,
+        "promo": null,
+        "manual": false
       }
     ],
     "57a11884-1af7-4d37-935f-603485819976": [
@@ -11726,6 +12041,15 @@
       },
       {
         "date": "2026-09-30",
+        "store": "woolworths",
+        "price": 8,
+        "wasPrice": null,
+        "onSpecial": false,
+        "promo": null,
+        "manual": false
+      },
+      {
+        "date": "2026-10-06",
         "store": "woolworths",
         "price": 8,
         "wasPrice": null,
@@ -11779,6 +12103,15 @@
         "onSpecial": false,
         "promo": null,
         "manual": false
+      },
+      {
+        "date": "2026-10-06",
+        "store": "woolworths",
+        "price": 10.95,
+        "wasPrice": null,
+        "onSpecial": false,
+        "promo": null,
+        "manual": false
       }
     ],
     "0bfd050b-172a-4f3e-b516-c19c566d12cc": [
@@ -11820,6 +12153,15 @@
       },
       {
         "date": "2026-09-30",
+        "store": "woolworths",
+        "price": 4,
+        "wasPrice": null,
+        "onSpecial": false,
+        "promo": null,
+        "manual": false
+      },
+      {
+        "date": "2026-10-06",
         "store": "woolworths",
         "price": 4,
         "wasPrice": null,
