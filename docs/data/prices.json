@@ -13775,35 +13775,6 @@
         "promo": null,
         "manual": false
       }
-    ],
-    "f21795d2-1d60-41ab-a96f-d187e312b7a4": [
-      {
-        "date": "2026-09-19",
-        "store": "coles",
-        "price": 8,
-        "wasPrice": null,
-        "onSpecial": true,
-        "promo": null,
-        "manual": false
-      },
-      {
-        "date": "2026-09-23",
-        "store": "coles",
-        "price": 8,
-        "wasPrice": null,
-        "onSpecial": true,
-        "promo": null,
-        "manual": false
-      },
-      {
-        "date": "2026-09-30",
-        "store": "coles",
-        "price": 8,
-        "wasPrice": null,
-        "onSpecial": true,
-        "promo": null,
-        "manual": false
-      }
     ]
   }
 }
