@@ -419,7 +419,8 @@
         "url": "https://www.woolworths.com.au/shop/productdetails/9228/fehlbergs-burger-pickles"
       }
     },
-    "upcoming": null
+    "upcoming": null,
+    "stashed": true
   },
   {
     "id": "b03f35cf-a5dc-4ace-8ad0-8a4bcdc1587a",
