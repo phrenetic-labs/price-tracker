@@ -1,5 +1,5 @@
 {
-  "lastRefresh": "2026-11-18T03:36:49.530Z",
+  "lastRefresh": "2026-11-18T04:42:55.829Z",
   "history": {
     "c1c7c796-467c-4e22-89c6-3f97d794fa6c": [
       {
@@ -18877,6 +18877,17 @@
         "price": 6.75,
         "wasPrice": 9,
         "onSpecial": true,
+        "promo": null,
+        "manual": false
+      }
+    ],
+    "b74bb3a0-ddbe-4743-bcc8-2dd08242705c": [
+      {
+        "date": "2026-11-18",
+        "store": "woolworths",
+        "price": 6.5,
+        "wasPrice": null,
+        "onSpecial": false,
         "promo": null,
         "manual": false
       }
