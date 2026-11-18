@@ -603,5 +603,16 @@
       }
     },
     "upcoming": null
+  },
+  {
+    "id": "2c2779a7-105f-48cf-bb18-8424ec70bdf3",
+    "name": "Multix Bake",
+    "stores": {
+      "coles": {
+        "productId": "3975460",
+        "url": "https://www.coles.com.au/product/multix-greener-baking-paper-25m-3975460"
+      }
+    },
+    "upcoming": null
   }
 ]
