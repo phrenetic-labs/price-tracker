@@ -592,5 +592,16 @@
       }
     },
     "upcoming": null
+  },
+  {
+    "id": "b74bb3a0-ddbe-4743-bcc8-2dd08242705c",
+    "name": "Glad Bake",
+    "stores": {
+      "woolworths": {
+        "productId": "159217",
+        "url": "https://www.woolworths.com.au/shop/productdetails/159217/glad-to-be-green-compostable-brown-bake-cooking-paper"
+      }
+    },
+    "upcoming": null
   }
 ]
